@@ -1,8 +1,7 @@
 let assert = require('assert');
-
+let app = require('../../app');
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let app = require('../../app');
 let should = chai.should();
 let expect = chai.expect;
 
@@ -10,58 +9,42 @@ const fixtures = require("./fixtures/fixture");
 
 chai.use(chaiHttp);
 
-describe('recurrence api endpoint', function() {
+describe('recurrence api endpoint integration tests', function() {
 
-    beforeEach( () => { });
-
-    it('should call get group metadata api endpoint and get metadata', function(done) {
-      chai.request(app)
+    it('should call get group metadata api endpoint and get metadata', () => {
+      return chai.request(app)
         .post('/recurrence/groupMetadata')
         .attach('seerDictionaryFile',fixtures.DICTIONARY)
         .attach('seerDataFile',fixtures.TEXTDATA)
         .then( (res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.deep.include(fixtures.GROUP_METADATA);
-          done();
-        }).
-        catch( (err) => {
-          done(err);
         });
-
     });
 
-    it('should call get group metadata api endpoint and get Unexpected field error', function(done) {
-          chai.request(app)
-            .post('/recurrence/groupMetadata')
-            .attach('seerDictionaryFile',fixtures.DICTIONARY)
-            .attach('badfilename',fixtures.TEXTDATA)
-            .then( (res) => {
-              expect(res).to.have.status(500);
-              done();
-            }).
-            catch( (err) => {
-              done(err);
-            });
+    it('should call get group metadata api endpoint and get Unexpected field error', () => {
+      return chai.request(app)
+        .post('/recurrence/groupMetadata')
+        .attach('seerDictionaryFile',fixtures.DICTIONARY)
+        .attach('badfilename',fixtures.TEXTDATA)
+        .then( (res) => {
+          expect(res).to.have.status(500);
+      });
+    });
 
-        });
-
-    it('should call get individual metadata api endpoint and get metadata', function(done) {
-      chai.request(app)
+    it('should call get individual metadata api endpoint and get metadata', () => {
+      return chai.request(app)
         .post('/recurrence/individualMetadata')
         .attach('seerCSVDataFile',fixtures.CSVDATA)
         .then( (res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.deep.include(fixtures.INDIVIDUAL_METADATA);
-          done();
-        }).
-        catch( (err) => {
-          done(err);
         });
 
     });
 
-    it('should call get group data result with success', function(done) {
-      chai.request(app)
+    it('should call get group data result with success', () => {
+      return chai.request(app)
        .post('/recurrence/groupData')
        .set('accept','application/json')
        .attach('seerDictionaryFile',fixtures.DICTIONARY)
@@ -75,15 +58,11 @@ describe('recurrence api endpoint', function() {
          expect(res).to.have.status(200);
          expect(res.body).to.be.an('array');
          expect(res.body).to.have.length(120);
-         done();
-       }).
-       catch( (err) => {
-         done(err);
        });
     });
 
-    it('should call get group data result with failure missing field', function(done) {
-      chai.request(app)
+    it('should call get group data result with failure missing field', () => {
+      return chai.request(app)
        .post('/recurrence/groupData')
        .set('accept','application/json')
        .attach('seerDictionaryFile',fixtures.DICTIONARY)
@@ -95,10 +74,50 @@ describe('recurrence api endpoint', function() {
        .then( (res) => {
          expect(res).to.have.status(400);
          expect(res.text).to.contain('stageValue');
-         done();
-       }).
-       catch( (err) => {
-         done(err);
        });
     });
+
+    it('should call get individual data result with success', () => {
+      return chai.request(app)
+       .post('/recurrence/individualData')
+       .set('accept','application/json')
+       .field('strata','yeargroup,agegroup')
+       .field('covariates','')
+       .field('timeVariable','time')
+       .field('eventVariable','status')
+       .field('distribution','Weibull')
+       .field('stageVariable','agegroup')
+       .field('distantStageValue','1')
+       .field('adjustmentFactor','1.05')
+       .field('yearsOfFollowUp','22')
+       .attach('seerCSVDataFile',fixtures.CSVDATA)
+       .type('form')
+       .then( (res) => {
+         expect(res).to.have.status(200);
+         expect(res.body).to.be.an('array');
+         expect(res.body).to.have.length(88);
+       });
+    });
+
+    it('should call get individual data result with missing field', () => {
+      return chai.request(app)
+       .post('/recurrence/individualData')
+       .set('accept','application/json')
+       .field('strata','yeargroup,agegroup')
+       .field('covariates','')
+       .field('timeVariable','time')
+       .field('eventVariable','status')
+       .field('distribution','Weibull')
+       .field('stageVariable','agegroup')
+       .field('distantStageValue','1')
+       .field('adjustmentFactor','1.05')
+       //.field('yearsOfFollowUp','22')
+       .attach('seerCSVDataFile',fixtures.CSVDATA)
+       .type('form')
+       .then( (res) => {
+         expect(res).to.have.status(400);
+         expect(res.text).to.contain('yearsOfFollowUp');
+       });
+    });
+
 });

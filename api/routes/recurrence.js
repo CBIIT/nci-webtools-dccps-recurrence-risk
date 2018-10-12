@@ -82,6 +82,7 @@ router.post('/individualMetadata', individualDataFileUpload, function(req, res, 
 });
 
 router.post('/individualData', individualDataFileUpload, resolveWorkingDestination, (req, res, next) => {
+  console.log("==> individualData endpoint called");
 
   var input = {
       'requestId': req.requestId,
@@ -101,7 +102,6 @@ router.post('/individualData', individualDataFileUpload, resolveWorkingDestinati
     };
 
   try {
-    //console.log(input);
     var result = R("R/recurrence.R").data(input).callSync();
     res.download(result.pop());
   } catch(error) {

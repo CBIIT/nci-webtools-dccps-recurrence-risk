@@ -17,7 +17,9 @@ describe('recurrence rscript tests', function() {
       R(fixtures.RASYNC)
         .data({df: attitude, nGroups: 3, fxn: "mean" })
         .call(function(err, data) {
-          if (err) throw err;
+          if (err) {
+            done(err.toString());
+          }
           expect(data).to.be.an('array');
           expect(data).to.have.length(3);
           done();

@@ -642,6 +642,7 @@ recurrencerisk.group<-function(data,data.cansurv,stagevar,stage.dist.value,adj.r
   }
   
   out$s1_numerical[which(out$s1_numerical<0)] <- 0
+  out$s1_analytical[which(out$s1_analytical<0)] <- 0
   out[,"G_numerical"]   <- with(out,cure+(1-cure)*s1_numerical)
   out[,"CI_numerical"]  <- 1-out$G_numerical
   out[,"G_analytical"]  <- with(out,cure+(1-cure)*s1_analytical)
@@ -684,18 +685,32 @@ recurrencerisk.individual<-function(data,stratum,covar,timevar,eventvar,stagevar
   stage.dist.name <- stagevar
   nstratum<-length(stratum)
   ncovar<-length(covar)
-  stratum.nm.string<-paste("!is.na(data$",stratum,")", collapse=" & ",sep="")
-  covar.nm.string<-paste("!is.na(data$",covar,")", collapse=" & ",sep="")  
-  allvar.nm.string<-paste(stratum.nm.string," & ",covar.nm.string,sep="")
-  if(ncovar==0){
-    allvar.nm.string<-stratum.nm.string
-  }
-  if(nstratum==0){
-    allvar.nm.string<-covar.nm.string
+
+  if(nstratum>0 & ncovar>0){
+    stratum.nm.string<-paste("!is.na(data$",stratum,")", collapse=" & ",sep="")
+    covar.nm.string<-paste("!is.na(data$",covar,")", collapse=" & ",sep="")  
+    allvar.nm.string<-paste(stratum.nm.string," & ",covar.nm.string,sep="")
   }
   
-  data.nm <- eval(parse(text=paste("data[",allvar.nm.string,",]")))
-  data<-data.nm
+  if(ncovar==0 & nstratum>0){
+    stratum.nm.string<-paste("!is.na(data$",stratum,")", collapse=" & ",sep="")
+    allvar.nm.string<-stratum.nm.string
+  }
+  if(nstratum==0 & ncovar>0){
+    covar.nm.string<-paste("!is.na(data$",covar,")", collapse=" & ",sep="")  
+    allvar.nm.string<-covar.nm.string
+  }
+  if(nstratum==0 & ncovar==0){
+    stratum<-"nostratum"
+    data[,"nostratum"]<-0
+  }
+  
+  if(nstratum>0 | ncovar>0){
+    data.nm <- eval(parse(text=paste("data[",allvar.nm.string,",]")))
+    data<-data.nm
+  }
+  
+  
   int.max<-max(data[,timevar],na.rm=T) 
   int.max.out<-fup.value
   
@@ -1146,6 +1161,9 @@ recurrencerisk.individual<-function(data,stratum,covar,timevar,eventvar,stagevar
   out[,"link"]<-link
   
   out <- out[which(out$fup<=int.max.out),]
+  if(nstratum==0 & ncovar==0){
+    stratum<-NULL
+  }
   out <- out[,c(stratum,covar,"fup","link","r","cure","lambda","k","theta",
                 "surv_curemodel","surv_notcured","median_surv_notcured",
                 "s1_numerical","G_numerical","CI_numerical",
@@ -1154,3 +1172,4 @@ recurrencerisk.individual<-function(data,stratum,covar,timevar,eventvar,stagevar
   colnames(out)[which(colnames(out)=="fup")]<-"followup"
   return(out)
 } # end of function recurrencerisk.individual
+
