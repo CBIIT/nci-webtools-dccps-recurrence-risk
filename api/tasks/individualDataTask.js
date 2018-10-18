@@ -5,11 +5,10 @@ function doIndividualDataTask(input,cb) {
   console.log('doIndividualDataTask ==> received: ' ,input);
   var fileResult;
   var error;
-  var email;
+  var email = input.email;
+  delete input.email;
   //default attachment
   input.mimeType = 'text/csv';
-  email = input.email;
-  delete input.email;
 
   try {
     fileResult = R("R/recurrence.R").data(input).callSync();

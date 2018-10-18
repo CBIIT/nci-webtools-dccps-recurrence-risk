@@ -16,23 +16,19 @@ transporter.use('compile',
   viewPath: path.resolve(__dirname)
 }));
 
-
-let mailOptions = {
-  from: '"Recurrence Risk Tool " <do.not.reply@nih.gov>', // sender address
-  to: '', // list of receivers
-  subject: 'Recurrence Risk Tool Results', // Subject line
-  template: 'recurrenceEmail',
-  context: {
-  }
-};
-
 module.exports.sendMail = (error,data) => {
-  mailOptions.to = data.receivers;
-  mailOptions.context = {
-    hasError: (error) ? true : false,
-    errorMsg: (error) ? error.message : '',
-    data: data.originalInput
-  }
+
+  let mailOptions = {
+    from: '"Recurrence Risk Tool " <do.not.reply@nih.gov>', // sender address
+    to: data.receivers,
+    subject: 'Recurrence Risk Tool Results', // Subject line
+    template: 'recurrenceEmail',
+    context: {
+      hasError: (error) ? true : false,
+      errorMsg: (error) ? error.message : '',
+      data: data.originalInput
+    }
+  };
 
   if(!error) {
     mailOptions.attachments = [{
