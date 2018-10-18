@@ -5,9 +5,5 @@
   "devDependencies": {
     "husky": "^1.1.1"
   },
-  "dependencies": {
-    "express-handlebars": "^3.0.0",
-    "express-validator": "^5.3.0",
-    "nodemailer-express-handlebars": "^3.0.0"
-  }
+  "dependencies": {}
 }
