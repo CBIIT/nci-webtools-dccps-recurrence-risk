@@ -9,14 +9,14 @@ const SEER_DATA_FIELD_NAME       = "seerDataFile";
 const CANSURV_DATA_FIELD_NAME    = "canSurvDataFile";
 const SEER_CSV_DATA_FIELD_NAME   = "seerCSVDataFile";
 
-const workerFarm = require('worker-farm')
-const workers = workerFarm({
+var workerFarm = require('worker-farm');
+var workers = workerFarm({
        maxCallsPerWorker           : 20 //safe guard against memory leaks
      , maxConcurrentWorkers        : 1  // 1 worker at a time
      , maxConcurrentCallsPerWorker : 1  // one task per worker
      , maxConcurrentCalls          : 10 // DOS setting, can crash if too many
      , maxCallTime                 : Infinity
-     , maxRetries                  : 3
+     , maxRetries                  : 1
      , autoStart                   : true
 }, require.resolve('../tasks/individualDataTask'));
 
@@ -73,8 +73,7 @@ exports.parseAndValidateGroupMetadata= (req, res, next) => {
   var input = {
     'requestId': req.requestId,
     'seerDictionaryFile': req.files['seerDictionaryFile'][0]['path'],
-    'seerDataFile': req.files['seerDataFile'][0]['path'],
-    'method': 'handleGroupMetadata'
+    'seerDataFile': req.files['seerDataFile'][0]['path']
   };
 
   req.input = input;
@@ -84,8 +83,7 @@ exports.parseAndValidateGroupMetadata= (req, res, next) => {
 exports.parseAndValidateIndividualMetadata= (req, res, next) => {
   var input = {
     'requestId': req.requestId,
-    'seerCSVDataFile': req.files['seerCSVDataFile'][0]['path'],
-    'method': 'handleIndividualMetadata'
+    'seerCSVDataFile': req.files['seerCSVDataFile'][0]['path']
   };
 
   req.input = input;
@@ -115,8 +113,7 @@ exports.parseAndValidateGroupData= (req, res, next) => {
         'adjustmentFactor': req.body['adjustmentFactor'],
         'yearsOfFollowUp': req.body['yearsOfFollowUp'],
         'workingDirectory': req.workingDirectory,
-        'mimeType': req.headers['accept'],
-        'method': 'handleRecurrenceRiskGroup'
+        'mimeType': req.headers['accept']
       };
 
       req.input = input;
@@ -166,8 +163,7 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
         'yearsOfFollowUp': req.body['yearsOfFollowUp'],
         'email': req.body['email'],
         'workingDirectory': req.workingDirectory,
-        'mimeType': req.headers['accept'],
-        'method': 'handleRecurrenceRiskIndividual'
+        'mimeType': req.headers['accept']
       };
       req.input = input;
       next();
@@ -179,19 +175,19 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
   });
 }
 
-exports.getRecurrenceRisk= (args) => {
+var getRecurrenceRisk = (args) => {
   try {
     delete args.email;
     return R("R/recurrence.R").data(args).callSync();
   } catch(error) {
-    console.log(error);
-    var errors = error.split('\n');
+    var errors = error.message.split('\n');
     var errorMsg = errors.pop().trim();
     throw new Error(errorMsg.replace(/[‘’]/g,''));
   }
 }
 
-exports.callRecurrenceRisk = (args) => {
+var callRecurrenceRisk = (args) => {
+  console.log('Queue count: %s',queueCount);
   if(queueCount < queueMax) {
     workers(args, (err,result) => {
       console.log('Callback returned with result: %s \n error: %s',result,err);
@@ -199,6 +195,34 @@ exports.callRecurrenceRisk = (args) => {
     });
     queueCount++;
   } else {
-    throw new Error('Application is too busy, try again later');
+    throw new Error('Application is too busy, try again later.');
   }
 }
+
+exports.getIndividualMetadata= (args) => {
+  args['method'] = 'handleIndividualMetadata';
+  return getRecurrenceRisk(args);
+}
+
+exports.getGroupMetadata= (args) => {
+  args['method'] = 'handleGroupMetadata';
+  return getRecurrenceRisk(args);
+}
+
+exports.getGroupData= (args) => {
+  args['method'] = 'handleRecurrenceRiskGroup';
+  return getRecurrenceRisk(args);
+};
+
+exports.getIndividualData= (args) => {
+  args['method'] = 'handleRecurrenceRiskIndividual';
+  return getRecurrenceRisk(args);
+};
+
+exports.callIndividualData= (args) => {
+  args['method'] = 'handleRecurrenceRiskIndividual';
+  return callRecurrenceRisk(args);
+}
+
+exports.getRecurrenceRisk = getRecurrenceRisk;
+exports.callRecurrenceRisk = callRecurrenceRisk;

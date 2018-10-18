@@ -15,16 +15,18 @@ function doIndividualDataTask(input,cb) {
     fileResult = fileResult.pop();
   } catch(err) {
     console.log('doIndividualDataTask ==> error: ',err);
-    var errors = err.split('\n');
+    var errors = err.message.split('\n');
     var errorMsg = errors.pop().trim();
     error = new Error(errorMsg.replace(/[‘’]/g,''));
   }
 
+  //[todo] what happens if this fails?
   emailUtil.sendMail(error,{
     fileResult: fileResult ,
     receivers: email,
     originalInput: input
     });
+
   cb(null,'done');
 }
 
