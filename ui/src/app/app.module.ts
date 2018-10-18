@@ -9,6 +9,7 @@ import {
   MatToolbarModule,
   MatButtonModule,
   MatCardModule,
+  MatDialogModule,
   MatButtonToggleModule,
   MatFormFieldModule,
   MatInputModule,
@@ -25,7 +26,7 @@ import {
 import { AppComponent } from './app.component';
 import { HeaderComponent,FooterComponent } from './common';
 import { GroupComponent } from './group/group.component';
-import { IndividualComponent } from './individual/individual.component';
+import { IndividualComponent, IndividualDialogComponent } from './individual/individual.component';
 import { GroupHelpComponent } from './group/group-help/group-help.component';
 import { IndividualHelpComponent } from './individual/individual-help/individual-help.component';
 
@@ -42,13 +43,16 @@ const appRoutes: Routes = [
     FooterComponent,
     GroupComponent,
     IndividualComponent,
+    IndividualDialogComponent,
     GroupHelpComponent,
     IndividualHelpComponent
   ],
   imports: [
     RouterModule.forRoot(
       appRoutes,
-      { enableTracing: false } // <-- debugging purposes only
+      { enableTracing: false,  // <-- debugging purposes only
+        useHash: true
+      }
     ),
     BrowserModule,
     BrowserAnimationsModule,
@@ -58,6 +62,7 @@ const appRoutes: Routes = [
     CovalentFileModule,
     MatToolbarModule,
     MatCardModule,
+    MatDialogModule,
     MatButtonModule,
     MatButtonToggleModule,
     MatFormFieldModule,
@@ -72,6 +77,7 @@ const appRoutes: Routes = [
     MatProgressBarModule,
     MatSortModule
   ],
+  entryComponents: [IndividualDialogComponent],
   providers: [],
   bootstrap: [AppComponent]
 })

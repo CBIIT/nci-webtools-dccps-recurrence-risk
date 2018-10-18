@@ -13,13 +13,17 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use(express.static('public'))
+
 app.use( (req,res,next) => {
   req.requestId = uuid();
   next();
 });
 
-app.use('/', indexRouter);
+app.get('/', (req,res) => res.sendFile('index.html',{ root: __dirname + "/public" } ));
 app.use('/recurrence', recurrenceRouter);
+
+
 
 app.use(function (err, req, res, next) {
   console.error(err.stack);

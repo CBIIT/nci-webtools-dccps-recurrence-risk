@@ -1,136 +1,49 @@
 var express = require('express');
-var multer = require('multer');
-var util = require('util');
-var R = require("../lib/r-script");
-
-const SEER_DICTIONARY_FIELD_NAME = "seerDictionaryFile";
-const SEER_DATA_FIELD_NAME = "seerDataFile";
-const CANSURV_DATA_FIELD_NAME = "canSurvDataFile";
-const SEER_CSV_DATA_FIELD_NAME = "seerCSVDataFile";
-
 var router = express.Router();
+var util = require('../utils/recurrenceUtil');
 
-var upload = multer({storage: multer.diskStorage({
-        filename: (req, file, cb) => {
-          var extension = "";
-          var type = "none";
-
-          if( file.fieldname == SEER_DICTIONARY_FIELD_NAME ) {
-            extension = "dic";
-            type = "dictionary";
-          } else if (file.fieldname == SEER_DATA_FIELD_NAME) {
-            extension = "txt";
-            type = "data";
-          } else if (file.fieldname == CANSURV_DATA_FIELD_NAME ||
-            file.fieldname == SEER_CSV_DATA_FIELD_NAME ) {
-            extension = "csv";
-            type = "data";
-          }
-
-          var _filename = util.format('%s_%s.%s',req.requestId,type,extension);
-          cb(null,_filename);
-        }
-    })
-});
-
-var groupMetadataFileUpload = upload.fields([
-  { name: SEER_DICTIONARY_FIELD_NAME, maxCount: 1 },
-  { name: SEER_DATA_FIELD_NAME, maxCount: 1 }
-]);
-
-var groupDataFileUpload = upload.fields([
-  {name: SEER_DICTIONARY_FIELD_NAME, maxCount: 1},
-  {name: SEER_DATA_FIELD_NAME, maxCount: 1},
-  {name: CANSURV_DATA_FIELD_NAME, maxCount: 1 }
-]);
-
-var individualDataFileUpload = upload.fields([
-  { name: SEER_CSV_DATA_FIELD_NAME, maxCount: 1 }
-]);
-
-var resolveWorkingDestination = (req,res,next) => {
-  upload.storage.getDestination(req,null, (err,directory) => {
-    if (err) return next(err);
-    req.workingDirectory = directory;
-    next();
-  });
-}
-
-router.post('/groupMetadata', groupMetadataFileUpload, (req, res, next) => {
-  console.log(req.requestId);
-
-  var input = {
-    'requestId': req.requestId,
-    'seerDictionaryFile': req.files['seerDictionaryFile'][0]['path'],
-    'seerDataFile': req.files['seerDataFile'][0]['path'],
-    'method': 'handleGroupMetadata'
-  };
-
-  var result = R("R/recurrence.R").data(input).callSync();
+router.post('/groupMetadata',
+  [ util.groupMetadataFileUpload, util.parseAndValidateGroupMetadata ], (req, res) => {
+  console.log("==> groupMetadata endpoint called");
+  var result = util.getRecurrenceRisk(req.input)
   res.send(result);
 });
 
-router.post('/individualMetadata', individualDataFileUpload, function(req, res, next) {
-  var input = {
-    'requestId': req.requestId,
-    'seerCSVDataFile': req.files['seerCSVDataFile'][0]['path'],
-    'method': 'handleIndividualMetadata'
-  };
-
-  var result = R("R/recurrence.R").data(input).callSync();
+router.post('/individualMetadata',[ util.individualDataFileUpload, util.parseAndValidateIndividualMetadata ] ,
+  (req, res) => {
+  console.log("==> individualMetadata endpoint called");
+  var result = util.getRecurrenceRisk(req.input);
   res.send(result);
 });
 
-router.post('/individualData', individualDataFileUpload, resolveWorkingDestination, (req, res, next) => {
+router.post('/individualData',[ util.individualDataFileUpload, util.resolveWorkingDestination,
+  util.parseAndValidateIndividualData ], (req, res) => {
   console.log("==> individualData endpoint called");
-
-  var input = {
-      'requestId': req.requestId,
-      'seerCSVDataFile': req.files['seerCSVDataFile'][0]['path'],
-      'strata': req.body['strata'],
-      'covariates': req.body['covariates'],
-      'timeVariable': req.body['timeVariable'],
-      'eventVariable': req.body['eventVariable'],
-      'distribution': req.body['distribution'],
-      'stageVariable': req.body['stageVariable'],
-      'distantStageValue': req.body['distantStageValue'],
-      'adjustmentFactor': req.body['adjustmentFactor'],
-      'yearsOfFollowUp': req.body['yearsOfFollowUp'],
-      'workingDirectory': req.workingDirectory,
-      'mimeType': req.headers['accept'],
-      'method': 'handleRecurrenceRiskIndividual'
-    };
-
   try {
-    var result = R("R/recurrence.R").data(input).callSync();
-    res.download(result.pop());
+
+    if(req.input.covariates && req.input.covariates.length > 0) {
+      util.callRecurrenceRisk(req.input);
+      res.status(202).send();
+    } else {
+      var result = util.getRecurrenceRisk(req.input);
+      res.download(result.pop());
+    }
+
   } catch(error) {
-    errors = error.split('\n');
-    res.status(400).send(errors.pop());
+    console.log(error);
+    res.status(400).send({ errors: error.message });
   }
 });
 
-router.post('/groupData', groupDataFileUpload, resolveWorkingDestination, (req, res, next) => {
-  var input = {
-      'requestId': req.requestId,
-      'seerDictionaryFile': req.files['seerDictionaryFile'][0]['path'],
-      'seerDataFile': req.files['seerDataFile'][0]['path'],
-      'canSurvDataFile': req.files['canSurvDataFile'][0]['path'],
-      'stageVariable': req.body['stageVariable'],
-      'stageValue': req.body['stageValue'],
-      'adjustmentFactor': req.body['adjustmentFactor'],
-      'yearsOfFollowUp': req.body['yearsOfFollowUp'],
-      'workingDirectory': req.workingDirectory,
-      'mimeType': req.headers['accept'],
-      'method': 'handleRecurrenceRiskGroup'
-    };
-
+router.post('/groupData', [ util.groupDataFileUpload, util.resolveWorkingDestination, util.parseAndValidateGroupData ],
+  (req, res) => {
+  console.log("==> group Data endpoint called");
   try {
-    var result = R("R/recurrence.R").data(input).callSync();
+    var result = util.getRecurrenceRisk(req.input);
     res.download(result.pop());
   } catch(error) {
-    errors = error.split('\n');
-    res.status(400).send(errors.pop());
+    console.log(error);
+    res.status(400).send({ errors: error.message});
   }
 });
 

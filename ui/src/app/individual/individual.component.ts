@@ -1,11 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Inject, Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { MatPaginator, MatTableDataSource, MatSort} from '@angular/material';
-
+import { MatPaginator,
+  MatTableDataSource,
+  MatSort ,
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA } from '@angular/material';
 import { TdFileService, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
 import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.service';
+
 import * as FileSaver from 'file-saver';
 
 @Component({
@@ -41,7 +46,7 @@ export class IndividualComponent implements OnInit {
 
   distributionList: string[] = ['Log-logistic','Weibull'];
 
-  individualMetadata: any = { variables: ['test1','test2','test3']};
+  individualMetadata: any = { variables: []};
 
   isDataLoading: boolean = false;
 
@@ -59,7 +64,7 @@ export class IndividualComponent implements OnInit {
     };
 
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
-    private riskService: RecurrenceRiskService,private router: Router) {
+    private riskService: RecurrenceRiskService,private router: Router,private dialog: MatDialog) {
     this.individualDataForm = formBuilder.group({
       seerCSVDataFile: [''],
       strata: [''],
@@ -70,7 +75,8 @@ export class IndividualComponent implements OnInit {
       stageVariable: [''],
       distantStageValue: [''],
       adjustmentFactor: [''],
-      yearsOfFollowUp: ['2']
+      yearsOfFollowUp: ['2'],
+      email: ['']
     });
 
     this.individualDataForm.get('seerCSVDataFile').valueChanges.subscribe( file => {
@@ -128,10 +134,15 @@ export class IndividualComponent implements OnInit {
     this.isDataLoading = true;
     this.fileUploadService.upload(options).subscribe( (response) => {
         this.isDataLoading = false;
-        downloadFlag ?
-          this.saveData(response) : this.displayData(response);
-      },
-      (err) => {
+        if(response) {
+          downloadFlag ? this.saveData(response) : this.displayData(response);
+        } else {
+          this.dialog.open(IndividualDialogComponent,
+           { width: '400px',
+             data: { infoOnly: true, message: 'Your calculations were submitted.' }
+           });
+        }
+    }, (err) => {
         this.errorMsg = err;
         this.individualDataForm.setErrors({'invalid':true});
         this.isDataLoading = false;
@@ -140,13 +151,30 @@ export class IndividualComponent implements OnInit {
   }
 
   onSubmit(downloadFlag: boolean = false) {
+
+    this.individualDataForm.updateValueAndValidity();
     //submit everything
     if(this.individualDataForm.invalid) {
-      this.errorMsg = "All form fields are required."
+      this.errorMsg = "All form fields except strata and covariates are required."
       return false;
     } else {
-      this.handleSubmitData(downloadFlag);
-      return true;
+      if(this.individualDataForm.get('covariates').value &&
+          this.individualDataForm.get('covariates').value.length > 0) {
+            const dialogRef = this.dialog.open(IndividualDialogComponent, {
+              width: '400px',
+              data: {}
+            });
+
+            dialogRef.afterClosed().subscribe(result => {
+              if(result) {
+                this.individualDataForm.patchValue({email: result });
+                this.handleSubmitData(downloadFlag);
+              }
+            });
+      } else {
+        this.handleSubmitData(downloadFlag);
+        return true;
+      }
     }
   }
 
@@ -215,4 +243,21 @@ export class IndividualComponent implements OnInit {
   getErrorMessage(): String {
     return this.errorMsg;
   }
+}
+
+@Component({
+  selector: 'individual-dialog',
+  templateUrl: 'individual-dialog.component.html',
+})
+export class IndividualDialogComponent {
+
+  constructor(
+    public dialogRef: MatDialogRef<IndividualDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any) {
+  }
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+
 }

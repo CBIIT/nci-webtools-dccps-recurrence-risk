@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>Notice</h1>
+
+<ng-container *ngIf="data.infoOnly; else preSubmit">
+  <div mat-dialog-content>
+    <p>{{data.message}}</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close] cdkFocusInitial>Ok</button>
+  </div>
+</ng-container>
+
+<ng-template #preSubmit>
+  <div mat-dialog-content>
+    <p>Please confirm you would like your job sent to the queuing system for calculation?</p>
+    <mat-form-field appearance="outline">
+      <input matInput placeholder="Email" [(ngModel)]="data.email" required>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancel</button>
+    <button mat-button [mat-dialog-close]="data.email" cdkFocusInitial>Ok</button>
+  </div>
+</ng-template>

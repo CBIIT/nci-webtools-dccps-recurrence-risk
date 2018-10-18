@@ -138,6 +138,7 @@ export class GroupComponent implements OnInit {
   }
 
   onSubmit(downloadFlag: boolean = false) {
+    this.groupDataForm.updateValueAndValidity();
     //submit everything
     if(this.groupDataForm.invalid) {
       this.errorMsg = "All form fields are required."

@@ -2,7 +2,7 @@ import { inject, async, ComponentFixture, TestBed } from '@angular/core/testing'
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router,NavigationStart } from '@angular/router';
 
-import { IndividualComponent } from './individual.component';
+import { IndividualComponent, IndividualDialogComponent } from './individual.component';
 
 import { ReactiveFormsModule,FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -14,6 +14,8 @@ import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.serv
 import { BrowserModule, By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+
 import { of, throwError } from 'rxjs';
 
 import {
@@ -21,6 +23,7 @@ import {
   MatListModule,
   MatButtonModule,
   MatCardModule,
+  MatDialogModule,
   MatButtonToggleModule,
   MatFormFieldModule,
   MatInputModule,
@@ -32,7 +35,8 @@ import {
   MatTableModule,
   MatPaginatorModule,
   MatProgressBarModule,
-  MatSortModule
+  MatSortModule,
+  MatDialog
 } from '@angular/material';
 
 @Component({
@@ -50,6 +54,12 @@ function findMatOptionFromSelectElement(matSelects: DebugElement[],key:string) {
   });
 }
 
+export class MatDialogMock {
+  open() {
+    return { afterClosed: () => of('email') };
+  }
+}
+
 describe('IndividualComponent', () => {
   let component: IndividualComponent;
   let fixture: ComponentFixture<IndividualComponent>;
@@ -57,7 +67,7 @@ describe('IndividualComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ IndividualComponent, IndividualHelpComponent, MockComponent ],
+      declarations: [ IndividualComponent, IndividualHelpComponent, IndividualDialogComponent, MockComponent ],
       imports: [
         BrowserModule,
         NoopAnimationsModule,
@@ -66,6 +76,7 @@ describe('IndividualComponent', () => {
         FlexLayoutModule,
         CovalentFileModule,
         MatCardModule,
+        MatDialogModule,
         MatListModule,
         MatButtonModule,
         MatButtonToggleModule,
@@ -84,9 +95,12 @@ describe('IndividualComponent', () => {
           { 'path':'group', component: MockComponent},
           { 'path':'individual',component: MockComponent}])
       ],
-     providers: [ RecurrenceRiskService ]
-    })
-    .compileComponents();
+     providers: [ RecurrenceRiskService, { provide: MatDialog, useClass: MatDialogMock } ]
+    }).overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [ IndividualDialogComponent ],
+      }
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -156,7 +170,8 @@ describe('IndividualComponent', () => {
      });
   })) );
 
-  it('should submit individual data form correctly', async( inject( [TdFileService],(mockFileService: TdFileService) => {
+  it('should submit individual data form correctly', async( inject( [TdFileService],
+    (mockFileService: TdFileService) => {
     component.individualMetadata = {
       values : { 'var1': [ '1','2','3'] ,'var2': ['a','b','c'] },
       variables: ['var1','var2']
@@ -171,14 +186,15 @@ describe('IndividualComponent', () => {
       {
         seerCSVDataFile: new File([],'data'),
         strata: ['a','b','c'],
-        covariates: ['d','e','f'],
+        covariates: '',
         timeVariable: 'var1',
         eventVariable: 'event',
         distribution: 'link',
         stageVariable: 'stagevar',
         distantStageValue: 'distantval',
         adjustmentFactor: '1.06',
-        yearsOfFollowUp: '2'
+        yearsOfFollowUp: '2',
+        email: ''
       }
     );
 
@@ -190,6 +206,42 @@ describe('IndividualComponent', () => {
       expect(component.dataSource.data[0]['link']).toBe('testlink');
       expect(component.dataSource.data[0]['cure']).toBe('1');
       expect(component.dataSource.data[0]['lambda']).toBe('2');
+    });
+
+  })));
+
+  it('should submit individual data form correctly for queue', async( inject( [TdFileService],
+    (mockFileService: TdFileService) => {
+    component.individualMetadata = {
+      values : { 'var1': [ '1','2','3'] ,'var2': ['a','b','c'] },
+      variables: ['var1','var2']
+    };
+    fixture.detectChanges();
+
+    let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(of(''));
+    spyOn(component,'loadSeerFormData').and.callFake( () => true);
+
+    component.individualDataForm.setValue(
+      {
+        seerCSVDataFile: new File([],'data'),
+        strata: ['a','b','c'],
+        covariates: ['a'],
+        timeVariable: 'var1',
+        eventVariable: 'event',
+        distribution: 'link',
+        stageVariable: 'stagevar',
+        distantStageValue: 'distantval',
+        adjustmentFactor: '1.06',
+        yearsOfFollowUp: '2',
+        email: ''
+      }
+    );
+
+    fixture.detectChanges();
+    component.onSubmit(false);
+    fixture.detectChanges();
+    fixture.whenStable().then( () => {
+      expect(uploadSpy).toHaveBeenCalled();
     });
 
   })));
@@ -218,7 +270,8 @@ describe('IndividualComponent', () => {
         stageVariable: 'stagevar',
         distantStageValue: 'distantval',
         adjustmentFactor: '1.06',
-        yearsOfFollowUp: '2'
+        yearsOfFollowUp: '2',
+        email: ''
       }
     );
 
@@ -255,7 +308,8 @@ describe('IndividualComponent', () => {
         stageVariable: 'stagevar',
         distantStageValue: 'distantval',
         adjustmentFactor: '1.06',
-        yearsOfFollowUp: '2'
+        yearsOfFollowUp: '2',
+        email: ''
       }
     );
 

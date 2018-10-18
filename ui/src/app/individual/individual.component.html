@@ -16,7 +16,7 @@
                           (keyup.delete)="dataFileInput.clear()"
                           (keyup.backspace)="dataFileInput.clear()">
             <input matInput placeholder="Select file"
-               [value]="individualDataForm?.value?.seerCSVDataFile?.name ? individualDataForm?.value?.seerCSVDataFile?.name : '' " readonly/>
+               [value]="individualDataForm?.value?.seerCSVDataFile?.name ? individualDataForm?.value?.seerCSVDataFile?.name : '' " readonly required/>
           </mat-form-field>
         </div>
 
