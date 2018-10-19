@@ -28,7 +28,7 @@ app.use('/recurrence', recurrenceRouter);
 app.use(function (err, req, res, next) {
   console.error(err.stack);
   console.error(err);
-  res.status(500).send({message: "system error"});
+  res.status(500).send({errors: ["system error"]});
 });
 
 module.exports = app;

@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   envName: 'dev',
-  apiUrl: 'https://analysistools-dev.nci.nih.gov/recurrencerisktool'
+  apiUrl: ''
 };
 
 /*

@@ -31,7 +31,7 @@ router.post('/individualData',[ util.individualDataFileUpload, util.resolveWorki
 
   } catch(error) {
     console.log(error);
-    res.status(400).send({ errors: error.message });
+    res.status(400).send({ errors: [error.message] });
   }
 });
 
@@ -43,7 +43,7 @@ router.post('/groupData', [ util.groupDataFileUpload, util.resolveWorkingDestina
     res.download(result.pop());
   } catch(error) {
     console.log(error);
-    res.status(400).send({ errors: error.message});
+    res.status(400).send({ errors: [error.message]});
   }
 });
 
