@@ -33,6 +33,17 @@ describe('recurrence api endpoint integration tests', function() {
       });
     });
 
+    it('should call get group metadata api endpoint correctly but fail R script', () => {
+      return chai.request(app)
+        .post('/recurrence/groupMetadata')
+        .attach('seerDictionaryFile',fixtures.DICTIONARY)
+        .attach('seerDataFile',fixtures.DICTIONARY)
+        .then( (res) => {
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.include({ errors: [ { msg: 'system error' } ] });
+      });
+    });
+
     it('should call get individual metadata api endpoint and get metadata', () => {
       return chai.request(app)
         .post('/recurrence/individualMetadata')
@@ -59,6 +70,23 @@ describe('recurrence api endpoint integration tests', function() {
          expect(res).to.have.status(200);
          expect(res.body).to.be.an('array');
          expect(res.body).to.have.length(120);
+       });
+    });
+
+    it('should call get group data result with R script error', () => {
+      return chai.request(app)
+       .post('/recurrence/groupData')
+       .set('accept','application/json')
+       .attach('seerDictionaryFile',fixtures.DICTIONARY)
+       .attach('seerDataFile',fixtures.TEXTDATA)
+       .attach('canSurvDataFile',fixtures.TEXTDATA)
+       .field('stageVariable','SEER_historic_stage_LRD')
+       .field('stageValue','0')
+       .field('yearsOfFollowUp','5')
+       .field('adjustmentFactor','0.05')
+       .then( (res) => {
+         expect(res).to.have.status(400);
+         expect(res.body).to.deep.include({ errors: [ { msg: '‘argument of length 0’'}]});
        });
     });
 
@@ -97,6 +125,27 @@ describe('recurrence api endpoint integration tests', function() {
          expect(res).to.have.status(200);
          expect(res.body).to.be.an('array');
          expect(res.body).to.have.length(88);
+       });
+    });
+
+    it('should call get individual data result with R script error', () => {
+      return chai.request(app)
+       .post('/recurrence/individualData')
+       .set('accept','application/json')
+       .field('strata','yeargroup,agegroup')
+       .field('covariates','')
+       .field('timeVariable','time')
+       .field('eventVariable','status')
+       .field('distribution','Weibull')
+       .field('stageVariable','agegroup')
+       .field('distantStageValue','1')
+       .field('adjustmentFactor','1.05')
+       .field('yearsOfFollowUp','1')
+       .attach('seerCSVDataFile',fixtures.CANSURVVDATA) //incorrect file so it breaks
+       .type('form')
+       .then( (res) => {
+         expect(res).to.have.status(400);
+         expect(res.body).to.deep.include({ errors: [ { msg: '‘undefined columns selected’'}]});
        });
     });
 

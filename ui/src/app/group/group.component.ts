@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { MatPaginator, MatTableDataSource, MatSort} from '@angular/material';
+import { MatPaginator, MatTableDataSource, MatSort, MatDialog} from '@angular/material';
 import { TdFileService, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
 import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.service';
+import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
 import * as FileSaver from 'file-saver';
 
 @Component({
@@ -15,18 +16,16 @@ import * as FileSaver from 'file-saver';
 export class GroupComponent implements OnInit {
 
   dataSource = new MatTableDataSource<any>([{},{},{}]);
-
-  displayedColumns: string[] = [
+  CORE_COLUMNS: string[] = [
+    'followup',
     'link',
+    'r',
     'cure',
     'lambda',
     'theta',
     'surv_curemodel',
     'surv_notcured',
     'median_surv_notcured',
-    's1_numerical',
-    'G_numerical',
-    'CI_numerical',
     's1_analytical',
     'G_analytical',
     'CI_analytical',
@@ -34,7 +33,10 @@ export class GroupComponent implements OnInit {
     'obs_surv',
     'obs_dist_surv'];
 
-  columnsToDisplay: string[] = this.displayedColumns.slice();
+  displayedColumns: string[] = [];
+
+  columnsToDisplay: string[] = [];
+
   groupDataForm: FormGroup;
 
   followup: any = {
@@ -46,8 +48,6 @@ export class GroupComponent implements OnInit {
 
   groupMetadata: any = {};
 
-  isGroupDataLoading: boolean = false;
-
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -55,7 +55,7 @@ export class GroupComponent implements OnInit {
   errorMsg: string = "";
 
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
-    private riskService: RecurrenceRiskService,private router: Router) {
+    private riskService: RecurrenceRiskService,private router: Router,private dialog: MatDialog) {
     this.groupDataForm = formBuilder.group({
       seerDictionaryFile: new FormControl(''),
       seerDataFile: new FormControl(''),
@@ -79,7 +79,8 @@ export class GroupComponent implements OnInit {
         this.riskService.setCurrentState('group', {
           data: this.dataSource.data,
           metadata: this.groupMetadata,
-          form: this.groupDataForm.value
+          form: this.groupDataForm.value,
+          dispColumns: this.displayedColumns
         });
 	  	}
 	  });
@@ -92,6 +93,8 @@ export class GroupComponent implements OnInit {
 	  this.dataSource.data = state.data;
 	  this.groupMetadata = state.metadata;
 	  this.groupDataForm.patchValue(state.form, {emitEvent: false});
+	  this.displayedColumns = state.dispColumns || this.CORE_COLUMNS.slice();
+	  this.columnsToDisplay = state.dispColumns || this.displayedColumns;
   }
 
   handleSeerDictionaryFileChange(file: File) {
@@ -122,17 +125,22 @@ export class GroupComponent implements OnInit {
       headers: headers
     };
 
-    this.isGroupDataLoading = true;
+    let dialogRef = this.dialog.open(LoadingDialogComponent);
+
     this.fileUploadService.upload(options).subscribe(
       (response) => {
-        this.isGroupDataLoading = false;
-        downloadFlag ?
-          this.saveData(response) : this.displayData(response);
+        dialogRef.close();
+        downloadFlag ? this.saveData(response) : this.displayData(response);
       },
       (err) => {
-        this.errorMsg = err;
+        dialogRef.close();
+        if(typeof err === 'string') {
+          err = JSON.parse(err);
+        }
+        let errorObj = err.errors.pop();
+        errorObj.param = errorObj.param || '';
+        this.errorMsg = `Error: ${errorObj.param} ${errorObj.msg}`;
         this.groupDataForm.setErrors({'invalid':true});
-        this.isGroupDataLoading = false;
         this.dataSource.data = [];
     });
   }
@@ -165,21 +173,36 @@ export class GroupComponent implements OnInit {
         formData: formData
        };
 
-       this.fileUploadService.upload(options).subscribe(
-         (response) => {
-           let metadata = JSON.parse(response);
-           this.groupMetadata = metadata;
-           this.followup.max = this.groupMetadata.maxFollowUp[0];
-         },
-         (err) => {
-           this.groupMetadata = {};
-           this.followup.max = 30;
-           this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
-         });
+      let dialogRef = this.dialog.open(LoadingDialogComponent);
+      this.fileUploadService.upload(options).subscribe(
+        (response) => {
+          dialogRef.close();
+          this.groupDataForm.patchValue(
+                      { stageVariable: '',
+                        stageValue: '',
+                        adjustmentFactor: '1',
+                        yearsOfFollowUp: '25'}, {emitEvent: false} );
+          let metadata = JSON.parse(response);
+          this.groupMetadata = metadata;
+          this.followup.max = this.groupMetadata.maxFollowUp[0];
+          this.errorMsg = '';
+          this.groupDataForm.markAsUntouched();
+        },
+        (err) => {
+          dialogRef.close();
+          this.groupMetadata = {};
+          this.followup.max = 30;
+          this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
+        });
      }
   }
 
   displayData(response) {
+    this.displayedColumns = this.CORE_COLUMNS.slice();
+    this.groupMetadata.variables
+      .filter( (val) => val.toLowerCase().indexOf('page_type') < 0 )
+      .forEach( (val) => this.displayedColumns.unshift(val) );
+    this.columnsToDisplay = this.displayedColumns;
     const data = JSON.parse(response);
     this.dataSource.data = data;
   }

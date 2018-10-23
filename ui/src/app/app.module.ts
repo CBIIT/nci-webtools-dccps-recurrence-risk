@@ -20,7 +20,7 @@ import {
   MatTabsModule,
   MatTableModule,
   MatPaginatorModule,
-  MatProgressBarModule,
+  MatProgressSpinnerModule,
   MatSortModule
 } from '@angular/material';
 import { AppComponent } from './app.component';
@@ -29,6 +29,7 @@ import { GroupComponent } from './group/group.component';
 import { IndividualComponent, IndividualDialogComponent } from './individual/individual.component';
 import { GroupHelpComponent } from './group/group-help/group-help.component';
 import { IndividualHelpComponent } from './individual/individual-help/individual-help.component';
+import { LoadingDialogComponent } from '../shared/dialogs/loading-dialog.component';
 
 const appRoutes: Routes = [
   { path: 'individual', component: IndividualComponent },
@@ -45,7 +46,8 @@ const appRoutes: Routes = [
     IndividualComponent,
     IndividualDialogComponent,
     GroupHelpComponent,
-    IndividualHelpComponent
+    IndividualHelpComponent,
+    LoadingDialogComponent
   ],
   imports: [
     RouterModule.forRoot(
@@ -74,10 +76,10 @@ const appRoutes: Routes = [
     MatTabsModule,
     MatTableModule,
     MatPaginatorModule,
-    MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSortModule
   ],
-  entryComponents: [IndividualDialogComponent],
+  entryComponents: [IndividualDialogComponent, LoadingDialogComponent],
   providers: [],
   bootstrap: [AppComponent]
 })

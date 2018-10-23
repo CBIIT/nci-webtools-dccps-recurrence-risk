@@ -12,6 +12,14 @@ describe('recurrence rscript tests', function() {
       expect(result).to.include.members([ 'oedorlwlh l', 'oldlrhelwo ' ]);
     });
 
+    it('test r script sync', function() {
+      try {
+        var result = R(fixtures.RSYNC).data("", 2).callSync();
+      } catch(err) {
+        expect(err.message).to.contain('dim(X) must have a positive length');
+      }
+    });
+
     it('test r script async', function(done) {
       var attitude = JSON.parse(require("fs").readFileSync(fixtures.RDATAFILE, "utf8"));
       R(fixtures.RASYNC)
@@ -22,6 +30,17 @@ describe('recurrence rscript tests', function() {
           }
           expect(data).to.be.an('array');
           expect(data).to.have.length(3);
+          done();
+        });
+
+    });
+
+    it('test r script async error', function(done) {
+      var attitude = JSON.parse(require("fs").readFileSync(fixtures.RDATAFILE, "utf8"));
+      R(fixtures.RASYNC)
+        .data(null)
+        .call(function(err, data) {
+          expect(err.toString()).to.contain('‘no applicable method for \'mutate_\' applied to an object of class "function"’');
           done();
         });
 

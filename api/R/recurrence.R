@@ -15,7 +15,7 @@ handleInterface <- function(args) {
   method = args$method
   stopifnot( exists("method"), match(method,methods) > 0 )
   args$method = NULL
-  do.call(method,args)
+  return(do.call(method,args))
 }
 
 handleGroupMetadata <- function(requestId,seerDictionaryFile,seerDataFile) {
@@ -52,7 +52,7 @@ handleIndividualMetadata <- function(requestId,seerCSVDataFile) {
 
 handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFile, canSurvDataFile,
   stageVariable, stageValue, adjustmentFactor, yearsOfFollowUp, workingDirectory, mimeType) {
-  cat("handleRecurrenceRiskGroup() ",requestId,"\n", file = stdout())
+  cat("handleRecurrenceRiskGroup() ",requestId,"\n", file = 'r.out.log',  append = T)
   stopifnot(exists("seerDictionaryFile"),exists("seerDataFile"),exists('canSurvDataFile'),
     file.exists(seerDictionaryFile),file.exists(seerDataFile),file.exists(canSurvDataFile))
   seerData = read.SeerStat(seerDictionaryFile,seerDataFile)
@@ -69,6 +69,7 @@ handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFil
     resultFilePath = file.path(workingDirectory,paste0(requestId,"_result.json"))
     write_json(dataTable,resultFilePath,na = "string", digits = NA, auto_unbox = T, dataframe = "rows")
   }
+  cat("handleRecurrenceRiskGroup() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
   return(resultFilePath)
 }
 
@@ -76,7 +77,7 @@ handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFil
 handleRecurrenceRiskIndividual <- function(requestId, seerCSVDataFile, strata,
   covariates, timeVariable, eventVariable, distribution, stageVariable, distantStageValue,
   adjustmentFactor, yearsOfFollowUp, workingDirectory, mimeType) {
-  cat("handleRecurrenceRiskIndividual() ",requestId,"\n", file = stdout())
+  cat("handleRecurrenceRiskIndividual() ",requestId,"\n", file = 'r.out.log',  append = T)
   stopifnot(exists("seerCSVDataFile"),file.exists(seerCSVDataFile))
   seerData = fread(seerCSVDataFile)
 
@@ -95,6 +96,7 @@ handleRecurrenceRiskIndividual <- function(requestId, seerCSVDataFile, strata,
     resultFilePath = file.path(workingDirectory,paste0(requestId,"_result.json"))
     write_json(dataTable,resultFilePath,na = "string", digits = NA, auto_unbox = T, dataframe = "rows")
   }
+  cat("handleRecurrenceRiskIndividual() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
   return(resultFilePath)
 }
 

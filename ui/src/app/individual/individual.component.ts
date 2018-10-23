@@ -10,6 +10,7 @@ import { MatPaginator,
 import { TdFileService, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
 import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.service';
+import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
 
 import * as FileSaver from 'file-saver';
 
@@ -21,26 +22,26 @@ import * as FileSaver from 'file-saver';
 export class IndividualComponent implements OnInit {
 
   dataSource = new MatTableDataSource<any>([{},{},{}]);
-
-  displayedColumns: string[] = [
+  CORE_COLUMNS: string[] = [
+    'followup',
     'link',
+    'r',
     'cure',
     'lambda',
     'theta',
     'surv_curemodel',
     'surv_notcured',
     'median_surv_notcured',
-    's1_numerical',
-    'G_numerical',
-    'CI_numerical',
     's1_analytical',
     'G_analytical',
     'CI_analytical',
     'se_CI_analytical',
     'obs_surv',
-    'obs_dist_surv'];
+    'obs_dist_surv' ];
 
-  columnsToDisplay: string[] = this.displayedColumns.slice();
+  displayedColumns: string[] = [];
+
+  columnsToDisplay: string[] = [];
 
   individualDataForm: FormGroup;
 
@@ -98,7 +99,8 @@ export class IndividualComponent implements OnInit {
         this.riskService.setCurrentState('individual', {
           data: this.dataSource.data,
           metadata: this.individualMetadata,
-          form: this.individualDataForm.value
+          form: this.individualDataForm.value,
+          dispColumns: this.displayedColumns
         });
       }
     });
@@ -113,6 +115,8 @@ export class IndividualComponent implements OnInit {
     this.individualMetadata = state.metadata;
     this.individualDataForm.patchValue(state.form, {emitEvent: false});
     this.individualDataForm.patchValue({ timeVariable: state.form.timeVariable }, {emitEvent: true});
+    this.displayedColumns = state.dispColumns || this.CORE_COLUMNS.slice();
+    this.columnsToDisplay = state.dispColumns || this.displayedColumns;
   }
 
   handleSubmitData(downloadFlag: boolean) {
@@ -131,9 +135,9 @@ export class IndividualComponent implements OnInit {
       headers: headers
     };
 
-    this.isDataLoading = true;
+    let dialogRef = this.dialog.open(LoadingDialogComponent);
     this.fileUploadService.upload(options).subscribe( (response) => {
-        this.isDataLoading = false;
+        dialogRef.close();
         if(response) {
           downloadFlag ? this.saveData(response) : this.displayData(response);
         } else {
@@ -143,7 +147,13 @@ export class IndividualComponent implements OnInit {
            });
         }
     }, (err) => {
-        this.errorMsg = err;
+        dialogRef.close();
+        if(typeof err === 'string') {
+          err = JSON.parse(err);
+        }
+        let errorObj = err.errors.pop();
+        errorObj.param = errorObj.param || '';
+        this.errorMsg = `Error: ${errorObj.param} ${errorObj.msg}`;
         this.individualDataForm.setErrors({'invalid':true});
         this.isDataLoading = false;
         this.dataSource.data = [];
@@ -192,12 +202,27 @@ export class IndividualComponent implements OnInit {
        formData: formData
       };
 
+     let dialogRef = this.dialog.open(LoadingDialogComponent);
      this.fileUploadService.upload(options).subscribe(
        (response) => {
+         dialogRef.close();
          let metadata = JSON.parse(response);
          this.individualMetadata = metadata;
+         this.individualDataForm.patchValue({
+          strata: '',
+          covariates: '',
+          timeVariable: '',
+          eventVariable: '',
+          distribution: '',
+          stageVariable: '',
+          distantStageValue: '',
+          adjustmentFactor: '',
+          yearsOfFollowUp: '2'}, {emitEvent: false});
+         this.errorMsg = '';
+         this.individualDataForm.markAsUntouched();
        },
        (err) => {
+         dialogRef.close();
          this.individualMetadata = {};
          this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
        });
@@ -205,6 +230,11 @@ export class IndividualComponent implements OnInit {
   }
 
   displayData(response) {
+    this.displayedColumns = this.CORE_COLUMNS.slice();
+    var strata = this.individualDataForm.get('strata').value;
+    strata && strata.filter(  (val) => val.length > 0)
+      .forEach( (val) => this.displayedColumns.unshift(val) );
+    this.columnsToDisplay = this.displayedColumns;
     const data = JSON.parse(response);
     this.dataSource.data = data;
   }

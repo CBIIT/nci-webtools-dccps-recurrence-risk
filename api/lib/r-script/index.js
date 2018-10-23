@@ -32,7 +32,17 @@ R.prototype.call = function(_opts, _callback) {
   var child = child_process.spawn("Rscript", this.args, this.options);
   child.stderr.on("data", callback);
   child.stdout.on("data", function(d) {
-    callback(null, JSON.parse(d));
+    //console.log('CallAsync:child.stdout ==>{ %s }', d.toString());
+    try {
+      callback(null, JSON.parse(d));
+    } catch(err) {
+      console.log('CallAsync:child.stdout ==>{ %s }',err);
+      callback(err);
+    }
+
+  });
+  child.on("close", (code) => {
+    console.log('CallAsync:child.close ==>{ %s }', code);
   });
 };
 
@@ -41,7 +51,11 @@ R.prototype.callSync = function(_opts) {
   this.options.env.input = JSON.stringify([this.d, this.path, opts]);
   var child = child_process.spawnSync("Rscript", this.args, this.options);
   if (child.stderr) throw new Error(child.stderr);
-  return(JSON.parse(child.stdout));
+  try {
+    return(JSON.parse(child.stdout));
+  } catch(err) {
+    throw new Error(err);
+  }
 };
 
 module.exports = init;

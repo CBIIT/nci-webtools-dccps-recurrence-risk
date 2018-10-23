@@ -70,8 +70,8 @@ describe('recurrence utility test', function() {
     });
   });
 
-  it('should test getRecurrenceRisk successfully', () => {
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { callSync: () => ['your_results'] }}} };
+  it('should test getRecurrenceRisk successfully', (done) => {
+    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => cb(null,['your_results']) }}} };
     let farmMock = (options,task) => { return (args,cb) => { cb(null,'done'); } };
     let workerMock = (args,cb) => { cb(null,'done'); };
 
@@ -80,14 +80,18 @@ describe('recurrence utility test', function() {
       workerFarm: farmMock,
       workers: workerMock
     })( () => {
-      var result = util.getRecurrenceRisk({ covariate: 1.23});
-      expect(result).to.contain('your_results');
+      util.getRecurrenceRisk({ covariate: 1.23})
+        .then( (data) => {
+        expect(data).to.contain('your_results');
+        done();
+      });
+
     });
 
   });
 
-  it('should test getRecurrenceRisk with exception', () => {
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { callSync: () => { throw Error('uh oh!!')} }}} };
+  it('should test getRecurrenceRisk with exception', (done) => {
+    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => { cb('uh oh!!\noops')} }}} };
     let farmMock = (options,task) => { return (args,cb) => { cb(null,'done'); } };
     let workerMock = (args,cb) => { cb(null,'done'); };
 
@@ -96,11 +100,10 @@ describe('recurrence utility test', function() {
       workerFarm: farmMock,
       workers: workerMock
     })( () => {
-      try {
-        util.getRecurrenceRisk({ covariate: 1.23});
-      } catch(error) {
-        expect(error.message).to.contain('uh oh!!');
-      }
+        util.getRecurrenceRisk({ covariate: 1.23}).catch( (err) => {
+          expect(err).to.contain('oops');
+          done();
+        });
     });
 
   });

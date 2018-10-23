@@ -14,12 +14,16 @@ import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.serv
 import { BrowserModule, By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+
+import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
 import { of, throwError } from 'rxjs';
 
 import {
   MatListModule,
   MatButtonModule,
   MatCardModule,
+  MatDialogModule,
   MatButtonToggleModule,
   MatFormFieldModule,
   MatInputModule,
@@ -30,8 +34,9 @@ import {
   MatTabsModule,
   MatTableModule,
   MatPaginatorModule,
-  MatProgressBarModule,
-  MatSortModule
+  MatProgressSpinnerModule,
+  MatSortModule,
+  MatDialog
 } from '@angular/material';
 
 @Component({
@@ -41,6 +46,16 @@ import {
 class MockComponent {
 }
 
+
+export class MatDialogMock {
+  open() {
+    return {
+      afterClosed: () => of('nothing'),
+      close: () => of('closed')
+    };
+  }
+}
+
 describe('GroupComponent', () => {
   let component: GroupComponent;
   let fixture: ComponentFixture<GroupComponent>;
@@ -48,7 +63,7 @@ describe('GroupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GroupComponent, GroupHelpComponent, MockComponent ],
+      declarations: [ GroupComponent, GroupHelpComponent, MockComponent, LoadingDialogComponent ],
       imports: [
         BrowserModule,
         NoopAnimationsModule,
@@ -69,15 +84,19 @@ describe('GroupComponent', () => {
         MatTabsModule,
         MatTableModule,
         MatPaginatorModule,
-        MatProgressBarModule,
+        MatProgressSpinnerModule,
         MatSortModule,
 		RouterTestingModule.withRoutes([
          { 'path':'group', component: MockComponent},
          { 'path':'individual',component: MockComponent}])
       ],
 	  providers: [
-	    RecurrenceRiskService
+	    RecurrenceRiskService, { provide: MatDialog, useClass: MatDialogMock }
 	  ]
+    }).overrideModule(BrowserDynamicTestingModule, {
+       set: {
+         entryComponents: [ LoadingDialogComponent ],
+       }
     })
     .compileComponents();
   }));
@@ -279,7 +298,7 @@ describe('GroupComponent', () => {
      fixture.detectChanges();
 
      let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(
-             throwError(new Error('oops!')));
+             throwError({ errors: [ {msg: 'oops!'} ] }));
      spyOn(component,'loadSeerFormData').and.callFake( () => true);
 
      component.groupDataForm.setValue(

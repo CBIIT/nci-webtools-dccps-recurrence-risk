@@ -176,14 +176,18 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
 }
 
 var getRecurrenceRisk = (args) => {
-  try {
-    delete args.email;
-    return R("R/recurrence.R").data(args).callSync();
-  } catch(error) {
-    var errors = error.message.split('\n');
-    var errorMsg = errors.pop().trim();
-    throw new Error(errorMsg.replace(/[‘’]/g,''));
-  }
+  delete args.email;
+  return new Promise( (resolve,reject) => {
+    R("R/recurrence.R").data(args).call((err,data) => {
+      if(err) {
+        var errors = err.toString().split('\n');
+        var errorMsg = errors.pop().trim();
+        reject(errorMsg);
+      } else {
+        resolve(data);
+      }
+    });
+  });
 }
 
 var callRecurrenceRisk = (args) => {

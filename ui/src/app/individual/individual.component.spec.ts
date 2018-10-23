@@ -3,6 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Router,NavigationStart } from '@angular/router';
 
 import { IndividualComponent, IndividualDialogComponent } from './individual.component';
+import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
 
 import { ReactiveFormsModule,FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -34,7 +35,7 @@ import {
   MatTabsModule,
   MatTableModule,
   MatPaginatorModule,
-  MatProgressBarModule,
+  MatProgressSpinnerModule,
   MatSortModule,
   MatDialog
 } from '@angular/material';
@@ -56,7 +57,10 @@ function findMatOptionFromSelectElement(matSelects: DebugElement[],key:string) {
 
 export class MatDialogMock {
   open() {
-    return { afterClosed: () => of('email') };
+    return {
+      afterClosed: () => of('email'),
+      close: () => of('closed')
+    };
   }
 }
 
@@ -67,7 +71,8 @@ describe('IndividualComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ IndividualComponent, IndividualHelpComponent, IndividualDialogComponent, MockComponent ],
+      declarations: [ IndividualComponent, IndividualHelpComponent, IndividualDialogComponent, LoadingDialogComponent,
+        MockComponent ],
       imports: [
         BrowserModule,
         NoopAnimationsModule,
@@ -89,7 +94,7 @@ describe('IndividualComponent', () => {
         MatTabsModule,
         MatTableModule,
         MatPaginatorModule,
-        MatProgressBarModule,
+        MatProgressSpinnerModule,
         MatSortModule,
         RouterTestingModule.withRoutes([
           { 'path':'group', component: MockComponent},
@@ -98,7 +103,7 @@ describe('IndividualComponent', () => {
      providers: [ RecurrenceRiskService, { provide: MatDialog, useClass: MatDialogMock } ]
     }).overrideModule(BrowserDynamicTestingModule, {
       set: {
-        entryComponents: [ IndividualDialogComponent ],
+        entryComponents: [ IndividualDialogComponent, LoadingDialogComponent ],
       }
     }).compileComponents();
   }));
@@ -256,7 +261,7 @@ describe('IndividualComponent', () => {
     fixture.detectChanges();
 
     let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(
-            throwError(new Error('oops!')));
+            throwError( { errors: [ {msg: 'oops!'} ] } ));
     spyOn(component,'loadSeerFormData').and.callFake( () => true);
 
     component.individualDataForm.setValue(
