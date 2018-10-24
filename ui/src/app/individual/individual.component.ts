@@ -49,7 +49,7 @@ export class IndividualComponent implements OnInit {
 
   individualMetadata: any = { variables: []};
 
-  isDataLoading: boolean = false;
+  loadingDialogRef: any;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -135,10 +135,10 @@ export class IndividualComponent implements OnInit {
       headers: headers
     };
 
-    let dialogRef = this.dialog.open(LoadingDialogComponent);
     this.fileUploadService.upload(options).subscribe( (response) => {
-        dialogRef.close();
+
         if(response) {
+          this.closeLoadingDialog();
           downloadFlag ? this.saveData(response) : this.displayData(response);
         } else {
           this.dialog.open(IndividualDialogComponent,
@@ -147,7 +147,7 @@ export class IndividualComponent implements OnInit {
            });
         }
     }, (err) => {
-        dialogRef.close();
+        this.closeLoadingDialog();
         if(typeof err === 'string') {
           err = JSON.parse(err);
         }
@@ -155,7 +155,6 @@ export class IndividualComponent implements OnInit {
         errorObj.param = errorObj.param || '';
         this.errorMsg = `Error: ${errorObj.param} ${errorObj.msg}`;
         this.individualDataForm.setErrors({'invalid':true});
-        this.isDataLoading = false;
         this.dataSource.data = [];
     });
   }
@@ -182,6 +181,7 @@ export class IndividualComponent implements OnInit {
               }
             });
       } else {
+        this.openLoadingDialog();
         this.handleSubmitData(downloadFlag);
         return true;
       }
@@ -202,10 +202,10 @@ export class IndividualComponent implements OnInit {
        formData: formData
       };
 
-     let dialogRef = this.dialog.open(LoadingDialogComponent);
+     this.openLoadingDialog();
      this.fileUploadService.upload(options).subscribe(
        (response) => {
-         dialogRef.close();
+         this.closeLoadingDialog();
          let metadata = JSON.parse(response);
          this.individualMetadata = metadata;
          this.individualDataForm.patchValue({
@@ -222,7 +222,7 @@ export class IndividualComponent implements OnInit {
          this.individualDataForm.markAsUntouched();
        },
        (err) => {
-         dialogRef.close();
+         this.closeLoadingDialog();
          this.individualMetadata = {};
          this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
        });
@@ -272,6 +272,16 @@ export class IndividualComponent implements OnInit {
 
   getErrorMessage(): String {
     return this.errorMsg;
+  }
+
+  closeLoadingDialog() {
+    if(this.loadingDialogRef) {
+      this.loadingDialogRef.close();
+    }
+  }
+
+  openLoadingDialog() {
+    this.loadingDialogRef = this.dialog.open(LoadingDialogComponent);
   }
 }
 
