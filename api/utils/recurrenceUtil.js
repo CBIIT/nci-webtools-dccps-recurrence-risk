@@ -13,7 +13,7 @@ var workerFarm = require('worker-farm');
 var workers = workerFarm({
        maxCallsPerWorker           : 20 //safe guard against memory leaks
      , maxConcurrentWorkers        : 1  // 1 worker at a time
-     , maxConcurrentCallsPerWorker : 1  // one task per worker
+     , maxConcurrentCallsPerWorker : 2  // 2 tasks per worker
      , maxConcurrentCalls          : 10 // DOS setting, can crash if too many
      , maxCallTime                 : Infinity
      , maxRetries                  : 1

@@ -21,7 +21,7 @@ run <- function(dataIn) {
   # process and return
   if (inherits(captured, "error")) {
     msg <- conditionMessage(captured)
-    cat("Error in R script", .e$path, "\n", sQuote(msg), file = stderr())
+    cat("Error in R script", .e$path, "\n", msg, file = stderr())
     return(invisible(F))
   }
   .e$out$x <- if (is.null(temp)) {

@@ -40,7 +40,7 @@ describe('recurrence rscript tests', function() {
       R(fixtures.RASYNC)
         .data(null)
         .call(function(err, data) {
-          expect(err.toString()).to.contain('‘no applicable method for \'mutate_\' applied to an object of class "function"’');
+          expect(err.toString()).to.contain('no applicable method for \'mutate_\' applied to an object of class "function"');
           done();
         });
 

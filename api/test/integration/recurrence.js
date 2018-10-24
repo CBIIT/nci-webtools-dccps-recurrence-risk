@@ -79,14 +79,15 @@ describe('recurrence api endpoint integration tests', function() {
        .set('accept','application/json')
        .attach('seerDictionaryFile',fixtures.DICTIONARY)
        .attach('seerDataFile',fixtures.TEXTDATA)
-       .attach('canSurvDataFile',fixtures.TEXTDATA)
        .field('stageVariable','SEER_historic_stage_LRD')
        .field('stageValue','0')
        .field('yearsOfFollowUp','5')
        .field('adjustmentFactor','0.05')
+       .attach('canSurvDataFile',fixtures.TEXTDATA)
+       .type('form')
        .then( (res) => {
          expect(res).to.have.status(400);
-         expect(res.body).to.deep.include({ errors: [ { msg: '‘argument of length 0’'}]});
+         expect(res.body).to.deep.include({ errors: [ { msg: 'argument of length 0'}]});
        });
     });
 
@@ -145,7 +146,7 @@ describe('recurrence api endpoint integration tests', function() {
        .type('form')
        .then( (res) => {
          expect(res).to.have.status(400);
-         expect(res.body).to.deep.include({ errors: [ { msg: '‘undefined columns selected’'}]});
+         expect(res.body).to.deep.include({ errors: [ { msg: 'undefined columns selected'}]});
        });
     });
 
