@@ -20,8 +20,12 @@
        margin: auto;
      }
 
-     td {
-       word-wrap: break-word;
+     .long-text {
+       word-break: break-all;
+       -moz-hyphens:auto;
+       -ms-hyphens:auto;
+       -webkit-hyphens:auto;
+       hyphens:auto;
      }
     </style>
 </head>
@@ -48,11 +52,11 @@
         <table>
             <tr>
                 <td>Strata:</td>
-                <td>{{data.strata}}</td>
+                <td class="long-text">{{data.strata}}</td>
             </tr>
             <tr>
                 <td>Covariates:</td>
-                <td>{{data.covariates}}</td>
+                <td class="long-text">{{data.covariates}}</td>
             </tr>
             <tr>
                 <td>Time Variable:</td>
