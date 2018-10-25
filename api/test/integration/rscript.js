@@ -12,7 +12,7 @@ describe('recurrence rscript tests', function() {
       expect(result).to.include.members([ 'oedorlwlh l', 'oldlrhelwo ' ]);
     });
 
-    it('test r script sync', function() {
+    it('test r script sync with error', function() {
       try {
         var result = R(fixtures.RSYNC).data("", 2).callSync();
       } catch(err) {

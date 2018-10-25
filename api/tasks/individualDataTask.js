@@ -1,16 +1,17 @@
 var R = require("../lib/r-script");
-var emailUtil = require("../utils/recurrenceEmailUtil");
 
 function doIndividualDataTask(input,cb) {
   console.log('doIndividualDataTask ==> received: ' ,input);
   let fileResult;
   let error;
   let email = input.email;
-  delete input.email;
+  let taskInput = Object.assign({},input);
+  delete taskInput.email;
   //default attachment
-  input.mimeType = 'text/csv';
+  taskInput.mimeType = 'text/csv';
 
-  R("R/recurrence.R").data(input).call((err,data) => {
+  R("R/recurrence.R").data(taskInput).call((err,data) => {
+
     if(err) {
       let errors = err.toString().split('\n');
       let errorMsg = errors.pop().trim();
@@ -18,14 +19,13 @@ function doIndividualDataTask(input,cb) {
     } else {
       fileResult = data.pop();
     }
-    //[todo] what happens if this fails?
-    emailUtil.sendMail(error,{
+
+    cb(error,{
       fileResult: fileResult ,
       receivers: email,
-      originalInput: input
-      });
+      originalInput: taskInput
+     });
 
-    cb(null,'done');
   });
 }
 

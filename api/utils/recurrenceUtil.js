@@ -1,6 +1,7 @@
 var R = require("../lib/r-script");
 var util = require('util');
 var multer = require('multer');
+var emailUtil = require("../utils/recurrenceEmailUtil");
 
 const expressValidator = require('express-validator');
 
@@ -142,8 +143,12 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
     req.check('adjustmentFactor').exists().isFloat();
     req.check('yearsOfFollowUp').exists().isFloat();
 
-    if(req.body['covariates'] && req.body['covariates'].length > 0) {
+    if(  (req.body['covariates'] && req.body['covariates'].length > 0)
+      || (req.body['strata'] && req.body['strata'].split(',').length > 2)
+      || req.body['yearsOfFollowUp'] > 10
+    ) {
       req.check('email').exists().isEmail();
+      req.isResponseByEmail = true;
     }
 
     req.getValidationResult().then( (valResult) => {
@@ -195,6 +200,8 @@ var callRecurrenceRisk = (args) => {
   if(queueCount < queueMax) {
     workers(args, (err,result) => {
       console.log('Callback returned with result: %s \n error: %s',result,err);
+       //[todo] send generic error to user
+      emailUtil.sendMail(err,result || { receivers: args.email});
       queueCount--;
     });
     queueCount++;

@@ -39,11 +39,12 @@ module.exports.sendMail = (error,data) => {
 
   console.log(' about to send email: ',data.fileResult);
   // send mail with defined transport object
+  //[todo] return promise or callback here instead of eating up the result/error
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error(error);
-      throw error;
+      console.log('Message not sent: %s',error);
+    }  else {
+      console.log('Message sent: %s', info.messageId);
     }
-    console.log('Message sent: %s', info.messageId);
   });
 }

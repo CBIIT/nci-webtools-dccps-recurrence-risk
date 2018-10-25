@@ -119,13 +119,13 @@ describe('recurrence api endpoint integration tests', function() {
        .field('stageVariable','agegroup')
        .field('distantStageValue','1')
        .field('adjustmentFactor','1.05')
-       .field('yearsOfFollowUp','22')
+       .field('yearsOfFollowUp','1')
        .attach('seerCSVDataFile',fixtures.CSVDATA)
        .type('form')
        .then( (res) => {
          expect(res).to.have.status(200);
          expect(res.body).to.be.an('array');
-         expect(res.body).to.have.length(88);
+         expect(res.body).to.have.length(4);
        });
     });
 
@@ -190,8 +190,30 @@ describe('recurrence api endpoint integration tests', function() {
        .type('form')
        .then( (res) => {
          expect(res).to.have.status(202);
-         setInterval( () => done(), 10000);
+         setTimeout( () => done(), 20000);
        });
     });
 
+    //should trigger email but making sure it fails when trying to send email
+    it('should call get individual data result for async request with year followup > 10', (done) => {
+        chai.request(app)
+       .post('/recurrence/individualData')
+       .set('accept','application/json')
+       .field('strata','yeargroup,agegroup')
+       .field('covariates','')
+       .field('timeVariable','time')
+       .field('eventVariable','status')
+       .field('distribution','Weibull')
+       .field('stageVariable','agegroup')
+       .field('distantStageValue','1')
+       .field('adjustmentFactor','1.05')
+       .field('yearsOfFollowUp','22')
+       .field('email','test12345@nih.gov')
+       .attach('seerCSVDataFile',fixtures.CSVDATA)
+       .type('form')
+       .then( (res) => {
+         expect(res).to.have.status(202);
+         setTimeout( () => done(), 20000);
+       });
+    });
 });

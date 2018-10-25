@@ -10,7 +10,7 @@
 }
 
 .sr-only {
-  position: absolute;
+  position:absolute;
   width: 1px;
   height: 1px;
   padding: 0;
@@ -26,6 +26,7 @@
   margin: 0;
   overflow: auto;
   clip: auto;
+  position:unset;
 }
 
 span {

@@ -4,7 +4,7 @@
     <mat-card-content>
       <form  [formGroup]="individualDataForm" (ngSubmit)="onSubmit()" fxLayout="column">
         <span class="form-label">CSV Data File:</span>
-        <div fxLayout="row">
+        <div fxLayout="row" fxLayout.xs="column">
           <td-file-input class="browse-button" #dataFileInput formControlName="seerCSVDataFile"  accept=".csv" required>
             <mat-icon>folder</mat-icon>
             <span>Browse...</span>

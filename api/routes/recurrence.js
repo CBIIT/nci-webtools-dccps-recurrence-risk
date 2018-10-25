@@ -24,7 +24,7 @@ router.post('/individualData',[ util.individualDataFileUpload, util.resolveWorki
   util.parseAndValidateIndividualData ], (req, res, next) => {
   console.log("==> individualData endpoint called");
 
-  if(req.input.covariates && req.input.covariates.length > 0) {
+  if(req.isResponseByEmail) {
     util.callIndividualData(req.input);
     res.status(202).send();
     next();
