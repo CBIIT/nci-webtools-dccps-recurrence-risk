@@ -3,11 +3,10 @@
     <mat-card-header></mat-card-header>
     <mat-card-content>
       <form  [formGroup]="individualDataForm" (ngSubmit)="onSubmit()" fxLayout="column">
-        <span class="form-label">CSV Data File:</span>
         <div fxLayout="row" fxLayout.xs="column">
           <td-file-input class="browse-button" #dataFileInput formControlName="seerCSVDataFile"  accept=".csv" required>
             <mat-icon>folder</mat-icon>
-            <span>Browse...</span>
+            <mat-label>Browse...</mat-label>
           </td-file-input>
           <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
                           (fileDrop)="individualDataForm.value.seerCSVDataFile = $event"
@@ -15,13 +14,14 @@
                           (keyup.enter)="dataFileInput.inputElement.click()"
                           (keyup.delete)="dataFileInput.clear()"
                           (keyup.backspace)="dataFileInput.clear()">
+            <mat-label>CSV Data File</mat-label>
             <input matInput placeholder="Select file"
                [value]="individualDataForm?.value?.seerCSVDataFile?.name ? individualDataForm?.value?.seerCSVDataFile?.name : '' " readonly required/>
           </mat-form-field>
         </div>
 
-        <span class="form-label">Strata:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Strata</mat-label>
           <mat-select formControlName="strata" multiple>
             <mat-option *ngFor="let strataVar of individualMetadata?.variables" [value]="strataVar">
               {{strataVar}}
@@ -29,8 +29,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Covariates:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Covariates</mat-label>
           <mat-select formControlName="covariates" multiple>
             <mat-option *ngFor="let covariatesVar of individualMetadata?.variables" [value]="covariatesVar">
               {{covariatesVar}}
@@ -38,8 +38,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Time Variable:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Time Variable</mat-label>
           <mat-select formControlName="timeVariable" required>
             <mat-option *ngFor="let timeVar of individualMetadata?.variables" [value]="timeVar">
               {{timeVar}}
@@ -47,8 +47,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Event Variable:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Event Variable</mat-label>
           <mat-select formControlName="eventVariable" required>
             <mat-option *ngFor="let eventVar of individualMetadata?.variables" [value]="eventVar">
               {{eventVar}}
@@ -56,8 +56,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Distribution:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Distribution</mat-label>
           <mat-select formControlName="distribution" required>
             <mat-option *ngFor="let distributionVar of distributionList" [value]="distributionVar">
               {{distributionVar}}
@@ -65,8 +65,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Stage Variable:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Stage Variable</mat-label>
           <mat-select formControlName="stageVariable" required>
             <mat-option *ngFor="let stageVar of individualMetadata?.variables" [value]="stageVar">
               {{stageVar}}
@@ -74,8 +74,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Distant Stage Value:</span>
         <mat-form-field appearance="outline">
+          <mat-label>Distant Stage Value</mat-label>
           <mat-select formControlName="distantStageValue" required>
             <mat-option *ngFor="let stageValueVar of valuesForVariable()" [value]="stageValueVar">
               {{stageValueVar}}
@@ -83,8 +83,8 @@
           </mat-select>
         </mat-form-field>
 
-        <span class="form-label">Adjustment Factor r:</span>
         <mat-form-field  appearance="outline">
+          <mat-label>Adjustment Factor r</mat-label>
           <input matInput type="number" formControlName="adjustmentFactor" min="1" max="2" step="0.05" required>
         </mat-form-field>
 
@@ -109,12 +109,12 @@
   </mat-card>
 
   <mat-card class="card-result mat-elevation-z10" fxFlex="1 1 calc(35%)" fxFlex.xs="1 1 auto">
-    <mat-card-content  >
+    <mat-card-content>
       <mat-tab-group>
         <mat-tab label="Output">
           <mat-error *ngIf="individualDataForm.invalid">{{getErrorMessage()}}</mat-error>
           <mat-form-field appearance="standard" fxLayout="row" fxLayoutAlign="start stretch">
-            <mat-label></mat-label>
+            <mat-label>Search Filter</mat-label>
             <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Filter">
           </mat-form-field>
           <div class="table-container">

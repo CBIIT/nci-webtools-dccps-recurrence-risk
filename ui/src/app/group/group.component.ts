@@ -62,7 +62,7 @@ export class GroupComponent implements OnInit {
       canSurvDataFile: new FormControl(''),
       stageVariable: new FormControl(''),
       stageValue: new FormControl(''),
-      adjustmentFactor: new FormControl('1'),
+      adjustmentFactor: new FormControl(''),
       yearsOfFollowUp: new FormControl('25')
     });
 
