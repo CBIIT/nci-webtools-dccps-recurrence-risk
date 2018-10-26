@@ -13,7 +13,7 @@
                            (click)="dicFileInput.inputElement.click()"
                            (keyup.enter)="dicFileInput.inputElement.click()"
                            (keyup.delete)="dicFileInput.clear()"
-                           (keyup.backspace)="dicFileInput.clear()">
+                           (keyup.backspace)="dicFileInput.clear()" flex>
                <mat-label>SEER*Stat Dic File</mat-label>
                <input matInput placeholder="Select file" [value]="groupDataForm?.value?.seerDictionaryFile?.name ? groupDataForm?.value?.seerDictionaryFile?.name : '' " required readonly/>
              </mat-form-field>

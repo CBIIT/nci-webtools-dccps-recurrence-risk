@@ -288,11 +288,9 @@ export class IndividualComponent implements OnInit {
   shouldProvideEmail(): boolean {
     let covariatesVal = this.individualDataForm.get('covariates').value;
     let strataVal = this.individualDataForm.get('strata').value;
-    let followupVal = this.individualDataForm.get('yearsOfFollowUp').value;
 
     return (covariatesVal && covariatesVal.length > 0)
       || (strataVal && strataVal.length > 2)
-      || (followupVal > 10);
   }
 }
 

@@ -145,7 +145,6 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
 
     if(  (req.body['covariates'] && req.body['covariates'].length > 0)
       || (req.body['strata'] && req.body['strata'].split(',').length > 2)
-      || req.body['yearsOfFollowUp'] > 10
     ) {
       req.check('email').exists().isEmail();
       req.isResponseByEmail = true;

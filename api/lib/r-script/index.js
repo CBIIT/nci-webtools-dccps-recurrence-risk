@@ -29,20 +29,26 @@ R.prototype.call = function(_opts, _callback) {
   var callback = _callback || _opts;
   var opts = _.isFunction(_opts) ? {} : _opts;
   this.options.env.input = JSON.stringify([this.d, this.path, opts]);
+  var _cache = this.options.env.input
   var child = child_process.spawn("Rscript", this.args, this.options);
-  child.stderr.on("data", callback);
-  child.stdout.on("data", function(d) {
-    //console.log('CallAsync:child.stdout ==>{ %s }', d.toString());
-    try {
-      callback(null, JSON.parse(d));
-    } catch(err) {
-      console.log('CallAsync:child.stdout ==>{ %s }',err);
-      callback(err);
-    }
 
-  });
+  var dataBuff = '';
+  var errorBuff = '';
+
+  child.stderr.setEncoding('utf8');
+  child.stdout.setEncoding('utf8');
+  child.stderr.on("data", (err) => errorBuff += err);
+  child.stdout.on("data", (data) => dataBuff += data);
   child.on("close", (code) => {
-    console.log('CallAsync:child.close ==>{ %s }', code);
+    if(errorBuff) {
+      callback(errorBuff);
+    } else {
+      try {
+        callback(null,JSON.parse(dataBuff));
+      } catch(err) {
+        callback(err);
+      }
+    }
   });
 };
 
@@ -50,7 +56,10 @@ R.prototype.callSync = function(_opts) {
   var opts = _opts || {};
   this.options.env.input = JSON.stringify([this.d, this.path, opts]);
   var child = child_process.spawnSync("Rscript", this.args, this.options);
-  if (child.stderr) throw new Error(child.stderr);
+  if (child.stderr) {
+    throw new Error(child.stderr);
+  }
+
   try {
     return(JSON.parse(child.stdout));
   } catch(err) {
