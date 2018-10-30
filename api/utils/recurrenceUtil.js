@@ -118,7 +118,7 @@ exports.parseAndValidateGroupData= (req, res, next) => {
       next();
 
     }).catch( (errors) => {
-      logger.log('info','validation errors %s',errors.array());
+      logger.log('info','validation errors. ',errors.array());
       res.status(400).json({ errors: errors.array() });
     });
 
@@ -171,7 +171,7 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
       req.input = input;
       next();
     }).catch( (errors) => {
-      logger.log('info','validation errors %s',errors.array());
+      logger.log('info','validation errors ',errors.array());
       res.status(400).json({ errors: errors.array() });
     });
 
@@ -184,7 +184,7 @@ var getRecurrenceRisk = (args) => {
   return new Promise( (resolve,reject) => {
     R("R/recurrence.R").data(args).call((err,data) => {
       if(err) {
-        logger.log('error','getRecurrenceRisk error: %s',err);
+        logger.log('error','getRecurrenceRisk error: ',err);
         var errors = err.toString().split('\n');
         var errorMsg = errors.pop().trim();
         reject(errorMsg);
@@ -197,7 +197,7 @@ var getRecurrenceRisk = (args) => {
 
 var callRecurrenceRisk = (args) => {
   workerUtil.callIndividualTask(args, (err,result) => {
-	logger.log('info','Callback returned with result: %s \n error: %s',result,err);
+	logger.log('info','Callback returned with result and error',result,err);
     //[todo] send generic error to user
     emailUtil.sendMail(err,result || { receivers: args.email});
   });

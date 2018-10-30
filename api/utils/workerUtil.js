@@ -70,7 +70,7 @@ var _callIndividualTask = (input,workersHandle,cb) => {
    preProcessInput(input).then( (data) => {
      logger.log('info','resolved pre-process ....');
      workersHandle(data, (err,result) => {
-       logger.log('info','Callback returned with result: %s \n error: %s', result, err);
+       logger.log('info','Callback returned with result: ', result, err);
        queueCount--;
   	   postProcessInput(data).then( () => cb(err,result) ); });
        queueCount++;

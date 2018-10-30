@@ -43,9 +43,9 @@ module.exports.sendMail = (error,data) => {
   //[todo] return promise or callback here instead of eating up the result/error
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      logger.log('error','Message not sent: %s',error);
+      logger.log('error','Message not sent.',error);
     }  else {
-      logger.log('info','Message sent: %s', info.messageId);
+      logger.log('info','Message sent.', info.messageId);
     }
   });
 }
