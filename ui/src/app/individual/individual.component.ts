@@ -7,7 +7,7 @@ import { MatPaginator,
   MatDialog,
   MatDialogRef,
   MAT_DIALOG_DATA } from '@angular/material';
-import { TdFileService, IUploadOptions } from '@covalent/core/file';
+import { TdFileService, TdFileInputComponent, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
 import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.service';
 import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
@@ -54,6 +54,8 @@ export class IndividualComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   @ViewChild(MatSort) sort: MatSort;
+
+  @ViewChild('dataFileInput') dataFileSelect: TdFileInputComponent;
 
   errorMsg: string = "";
 
@@ -117,12 +119,18 @@ export class IndividualComponent implements OnInit {
     this.individualDataForm.patchValue({ timeVariable: state.form.timeVariable }, {emitEvent: true});
     this.displayedColumns = state.dispColumns || this.CORE_COLUMNS.slice();
     this.columnsToDisplay = state.dispColumns || this.displayedColumns;
+    this.dataFileSelect.inputElement.setAttribute('aria-label','data file');
   }
 
   handleSubmitData(downloadFlag: boolean) {
     let formData: FormData = new FormData();
     Object.keys(this.individualDataForm.controls).forEach(key => {
-      formData.append(key,this.individualDataForm.get(key).value);
+      let input = this.individualDataForm.get(key);
+      if( key === 'seerCSVDataFile') {
+        formData.append(key,input.value,input.value.name);
+      } else {
+        formData.append(key,input.value);
+      }
     });
 
     let headers = { 'accept': downloadFlag ?

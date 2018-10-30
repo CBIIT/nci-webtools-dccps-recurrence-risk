@@ -7,6 +7,7 @@ function doIndividualDataTask(input,cb) {
   let email = input.email;
   let taskInput = Object.assign({},input);
   delete taskInput.email;
+  delete taskInput.seerCSVDataFileOriginalName;
   //default attachment
   taskInput.mimeType = 'text/csv';
 
@@ -15,7 +16,7 @@ function doIndividualDataTask(input,cb) {
     if(err) {
       let errors = err.toString().split('\n');
       let errorMsg = errors.pop().trim();
-      error = new Error(errorMsg.replace(/[‘’]/g,''));
+      error = new Error(errorMsg);
     } else {
       fileResult = data.pop();
     }
@@ -23,7 +24,7 @@ function doIndividualDataTask(input,cb) {
     cb(error,{
       fileResult: fileResult ,
       receivers: email,
-      originalInput: taskInput
+      originalInput: input
      });
 
   });

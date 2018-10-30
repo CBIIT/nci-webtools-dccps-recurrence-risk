@@ -2,6 +2,7 @@ var R = require("../lib/r-script");
 var util = require('util');
 var multer = require('multer');
 var emailUtil = require("../utils/recurrenceEmailUtil");
+var events = require('events').EventEmitter;
 
 const expressValidator = require('express-validator');
 
@@ -10,19 +11,14 @@ const SEER_DATA_FIELD_NAME       = "seerDataFile";
 const CANSURV_DATA_FIELD_NAME    = "canSurvDataFile";
 const SEER_CSV_DATA_FIELD_NAME   = "seerCSVDataFile";
 
-var workerFarm = require('worker-farm');
-var workers = workerFarm({
-       maxCallsPerWorker           : 20 //safe guard against memory leaks
-     , maxConcurrentWorkers        : 1  // 1 worker at a time
-     , maxConcurrentCallsPerWorker : 2  // 2 tasks per worker
-     , maxConcurrentCalls          : 10 // DOS setting, can crash if too many
-     , maxCallTime                 : Infinity
-     , maxRetries                  : 1
-     , autoStart                   : true
-}, require.resolve('../tasks/individualDataTask'));
+var workerUtil = require('../utils/workerUtil');
+var workerListener = new events.EventEmitter();
 
-const queueMax = process.env.QUEUE_MAX || 50;
-var queueCount = 0;
+workerListener.on('recover', (args) => {
+	callRecurrenceRisk(args);
+});
+
+workerUtil.init(workerListener);
 
 var upload = multer({storage: multer.diskStorage({
    filename: (req, file, cb) => {
@@ -153,9 +149,11 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
     req.getValidationResult().then( (valResult) => {
 
       valResult.throw();
+
       var input = {
         'requestId': req.requestId,
         'seerCSVDataFile': req.files['seerCSVDataFile'][0]['path'],
+        'seerCSVDataFileOriginalName': req.files['seerCSVDataFile'][0]['originalname'],
         'strata': req.body['strata'],
         'covariates': req.body['covariates'],
         'timeVariable': req.body['timeVariable'],
@@ -181,6 +179,7 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
 
 var getRecurrenceRisk = (args) => {
   delete args.email;
+  delete args.seerCSVDataFileOriginalName
   return new Promise( (resolve,reject) => {
     R("R/recurrence.R").data(args).call((err,data) => {
       if(err) {
@@ -195,18 +194,11 @@ var getRecurrenceRisk = (args) => {
 }
 
 var callRecurrenceRisk = (args) => {
-  console.log('Queue count: %s',queueCount);
-  if(queueCount < queueMax) {
-    workers(args, (err,result) => {
-      console.log('Callback returned with result: %s \n error: %s',result,err);
-       //[todo] send generic error to user
-      emailUtil.sendMail(err,result || { receivers: args.email});
-      queueCount--;
-    });
-    queueCount++;
-  } else {
-    throw new Error('Application is too busy, try again later.');
-  }
+  workerUtil.callIndividualTask(args, (err,result) => {
+	console.log('Callback returned with result: %s \n error: %s',result,err);
+    //[todo] send generic error to user
+    emailUtil.sendMail(err,result || { receivers: args.email});
+  });
 }
 
 exports.getIndividualMetadata= (args) => {

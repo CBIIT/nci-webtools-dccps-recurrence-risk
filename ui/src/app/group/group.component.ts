@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { MatPaginator, MatTableDataSource, MatSort, MatDialog} from '@angular/material';
-import { TdFileService, IUploadOptions } from '@covalent/core/file';
+import { TdFileService, TdFileInputComponent, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
 import { RecurrenceRiskService } from '../../shared/services/recurrenceRisk.service';
 import { LoadingDialogComponent } from '../../shared/dialogs/loading-dialog.component';
@@ -52,6 +52,12 @@ export class GroupComponent implements OnInit {
 
   @ViewChild(MatSort) sort: MatSort;
 
+  @ViewChild('dicFileInput') dicFileSelect: TdFileInputComponent;
+
+  @ViewChild('dataFileInput') dataFileSelect: TdFileInputComponent;
+
+  @ViewChild('canSurvFileInput') csvFileSelect: TdFileInputComponent;
+
   errorMsg: string = "";
 
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
@@ -95,6 +101,9 @@ export class GroupComponent implements OnInit {
 	  this.groupDataForm.patchValue(state.form, {emitEvent: false});
 	  this.displayedColumns = state.dispColumns || this.CORE_COLUMNS.slice();
 	  this.columnsToDisplay = state.dispColumns || this.displayedColumns;
+	  this.dicFileSelect.inputElement.setAttribute('aria-label','dic file');
+    this.dataFileSelect.inputElement.setAttribute('aria-label','data file');
+    this.csvFileSelect.inputElement.setAttribute('aria-label','csv file');
   }
 
   handleSeerDictionaryFileChange(file: File) {
