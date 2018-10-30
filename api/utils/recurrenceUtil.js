@@ -3,6 +3,7 @@ var util = require('util');
 var multer = require('multer');
 var emailUtil = require("../utils/recurrenceEmailUtil");
 var events = require('events').EventEmitter;
+var logger = require('./loggerUtil').logger;
 
 const expressValidator = require('express-validator');
 
@@ -117,7 +118,7 @@ exports.parseAndValidateGroupData= (req, res, next) => {
       next();
 
     }).catch( (errors) => {
-      console.log(errors.array());
+      logger.log('info','validation errors %s',errors.array());
       res.status(400).json({ errors: errors.array() });
     });
 
@@ -170,7 +171,7 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
       req.input = input;
       next();
     }).catch( (errors) => {
-      console.log(errors.array());
+      logger.log('info','validation errors %s',errors.array());
       res.status(400).json({ errors: errors.array() });
     });
 
@@ -183,6 +184,7 @@ var getRecurrenceRisk = (args) => {
   return new Promise( (resolve,reject) => {
     R("R/recurrence.R").data(args).call((err,data) => {
       if(err) {
+        logger.log('error','getRecurrenceRisk error: %s',err);
         var errors = err.toString().split('\n');
         var errorMsg = errors.pop().trim();
         reject(errorMsg);
@@ -195,7 +197,7 @@ var getRecurrenceRisk = (args) => {
 
 var callRecurrenceRisk = (args) => {
   workerUtil.callIndividualTask(args, (err,result) => {
-	console.log('Callback returned with result: %s \n error: %s',result,err);
+	logger.log('info','Callback returned with result: %s \n error: %s',result,err);
     //[todo] send generic error to user
     emailUtil.sendMail(err,result || { receivers: args.email});
   });

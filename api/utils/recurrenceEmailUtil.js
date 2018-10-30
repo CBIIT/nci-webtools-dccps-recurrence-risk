@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('express-handlebars');
 const nodemailerExpressHandlebars = require('nodemailer-express-handlebars');
 const viewEngine = handlebars.create({});
+var logger = require('./loggerUtil').logger;
 
 let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'mailfwd.nih.gov',
@@ -37,14 +38,14 @@ module.exports.sendMail = (error,data) => {
     }];
   }
 
-  console.log(' about to send email: ',data.fileResult);
+  logger.log('info','About to send email: %s',data.fileResult);
   // send mail with defined transport object
   //[todo] return promise or callback here instead of eating up the result/error
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.log('Message not sent: %s',error);
+      logger.log('error','Message not sent: %s',error);
     }  else {
-      console.log('Message sent: %s', info.messageId);
+      logger.log('info','Message sent: %s', info.messageId);
     }
   });
 }

@@ -1,5 +1,6 @@
 var _ = require("underscore"),
     child_process = require("child_process");
+var logger = require('../../utils/loggerUtil').logger;
 
 function init(path) {
   var obj = new R(path);
@@ -39,12 +40,13 @@ R.prototype.call = function(_opts, _callback) {
   child.stderr.on("data", (err) => errorBuff += err);
   child.stdout.on("data", (data) => dataBuff += data);
   child.on("close", (code) => {
-    if(errorBuff) {
-      callback(errorBuff);
+    if(errorBuff || code) {
+      callback(errorBuff || 'process closed with code: '+code);
     } else {
       try {
         callback(null,JSON.parse(dataBuff));
       } catch(err) {
+        logger.log('error','close child stdout issue',err);
         callback(err);
       }
     }

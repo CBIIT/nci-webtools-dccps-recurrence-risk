@@ -1,7 +1,8 @@
 var R = require("../lib/r-script");
+var logger = require('../utils/loggerUtil').logger;
 
 function doIndividualDataTask(input,cb) {
-  console.log('doIndividualDataTask ==> received: ' ,input);
+  logger.log('info','doIndividualDataTask ==> received: ' ,input);
   let fileResult;
   let error;
   let email = input.email;

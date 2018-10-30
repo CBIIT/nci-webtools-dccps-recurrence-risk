@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var logger = require('./loggerUtil').logger;
 
 var writeFile = util.promisify(fs.writeFile);
 var readFile = util.promisify(fs.readFile);
@@ -36,9 +37,9 @@ var preProcessInput = (data) => {
       var seerCSVDataFileTemp = data.seerCSVDataFile;
       data.seerCSVDataFile = seerCSVDataFileInput;
       writeFile(seerCSVDataFileRequest, JSON.stringify(data), 'utf8')
-      .catch( (err) => console.log(err))
+      .catch( (err) => logger.log('info','Could not create file request json %s',err))
       .then( () => copyFile(seerCSVDataFileTemp,seerCSVDataFileInput) )
-      .catch( (err) => console.log(err) )
+      .catch( (err) => logger.log('info','Could not copy file input csv %s',err) )
       .then( () => resolve(data) );
 
     });
@@ -50,9 +51,9 @@ var postProcessInput = (data) => {
   var seerCSVDataFileRequest = path.join(workingDir,util.format('%s_input.json',data.requestId));
   return new Promise( (resolve,reject) => {
    unlinkFile(seerCSVDataFileInput)
-    .catch( (err) => console.log(err))
+    .catch( (err) => logger.log('info','Could not delete file input csv %s',err))
     .then( () => unlinkFile(seerCSVDataFileRequest))
-    .catch( (err) => console.log(err))
+    .catch( (err) => logger.log('info','Could not delete file request json %s',err))
     .then( () => resolve(data))
   });
 }
@@ -64,15 +65,15 @@ var extension = (element) => {
 
 
 var _callIndividualTask = (input,workersHandle,cb) => {
- console.log('Queue count: %s',queueCount);
+ logger.log('info','Queue count: %s',queueCount);
  if(queueCount < queueMax) {
    preProcessInput(input).then( (data) => {
-     console.log('resolved pre-process ....');
+     logger.log('info','resolved pre-process ....');
      workersHandle(data, (err,result) => {
-       console.log('Callback returned with result: %s \n error: %s', result, err);
+       logger.log('info','Callback returned with result: %s \n error: %s', result, err);
        queueCount--;
-  	 postProcessInput(data).then( () => cb(err,result) ); });
-     queueCount++;
+  	   postProcessInput(data).then( () => cb(err,result) ); });
+       queueCount++;
    });
  } else {
    throw new Error('Application is too busy, try again later.');
@@ -88,7 +89,7 @@ var _init = (listener,readFileHandler) => {
         recoverData.isRecovery = true;
         listener.emit('recover',recoverData);
       } catch(err) {
-        console.log(err);
+        logger.log('error','init error could not find file listed',err);
       }
     });
   });

@@ -1,15 +1,15 @@
 var express = require('express');
-var logger = require('morgan');
 var cors = require('cors');
 
+var logger = require('./utils/loggerUtil').logger;
 var indexRouter = require('./routes/index');
 var recurrenceRouter = require('./routes/recurrence');
+
 const uuid = require('uuid/v1');
 
 var app = express();
 
 app.use(cors());
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -26,8 +26,7 @@ app.use('/recurrence', recurrenceRouter);
 
 
 app.use(function (err, req, res, next) {
-  console.error(err.stack);
-  console.error(err);
+  logger.log('error',err);
   res.status(500).send({errors: [ { msg:"system error"} ]});
 });
 

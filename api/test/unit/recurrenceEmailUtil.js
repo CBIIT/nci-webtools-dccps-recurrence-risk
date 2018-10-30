@@ -9,7 +9,6 @@ var emailUtil = rewire("../../utils/recurrenceEmailUtil");
 
 describe('recurrence email util tests', function() {
 
-
     it('test send email correctly', (done) => {
       let mockTransporter = { sendMail: (ops,cb) => cb(null,{ messageId:'messageid' } ) };
       let sendMailSpy = sinon.spy(mockTransporter,'sendMail');
