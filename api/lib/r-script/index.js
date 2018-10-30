@@ -29,7 +29,6 @@ R.prototype.call = function(_opts, _callback) {
   var callback = _callback || _opts;
   var opts = _.isFunction(_opts) ? {} : _opts;
   this.options.env.input = JSON.stringify([this.d, this.path, opts]);
-  var _cache = this.options.env.input
   var child = child_process.spawn("Rscript", this.args, this.options);
 
   var dataBuff = '';
