@@ -39,9 +39,9 @@ R.prototype.call = function(_opts, _callback) {
   child.stdout.setEncoding('utf8');
   child.stderr.on("data", (err) => errorBuff += err);
   child.stdout.on("data", (data) => dataBuff += data);
-  child.on("close", (code) => {
-    if(errorBuff || code) {
-      callback(errorBuff || 'process closed with code: '+code);
+  child.on("close", (code,signal) => {
+    if(errorBuff || code || signal) {
+      callback(errorBuff || `process closed with code: ${code} or signal ${signal}`);
     } else {
       try {
         callback(null,JSON.parse(dataBuff));

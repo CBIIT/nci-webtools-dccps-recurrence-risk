@@ -88,6 +88,11 @@ export class IndividualComponent implements OnInit {
       }
     });
 
+    this.individualDataForm.get('stageVariable').valueChanges.subscribe( (stageVar) => {
+      this.individualDataForm.patchValue({distantStageValue: ''}, {emitEvent: false});
+      this.errorMsg = '';
+    });
+
     this.individualDataForm.get('timeVariable').valueChanges.subscribe( (timeVar) => {
       let valuesMap = this.individualMetadata['values'];
       if(valuesMap && valuesMap[timeVar] && valuesMap[timeVar].length > 0 ) {
@@ -156,12 +161,7 @@ export class IndividualComponent implements OnInit {
         }
     }, (err) => {
         this.closeLoadingDialog();
-        if(typeof err === 'string') {
-          err = JSON.parse(err);
-        }
-        let errorObj = err.errors.pop();
-        errorObj.param = errorObj.param || '';
-        this.errorMsg = `Error: ${errorObj.param} ${errorObj.msg}`;
+        this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
         this.individualDataForm.setErrors({'invalid':true});
         this.dataSource.data = [];
     });
@@ -233,7 +233,7 @@ export class IndividualComponent implements OnInit {
        (err) => {
          this.closeLoadingDialog();
          this.individualMetadata = {};
-         this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
+         this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen."
        });
     }
   }

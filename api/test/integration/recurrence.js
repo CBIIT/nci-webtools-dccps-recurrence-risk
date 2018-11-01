@@ -40,7 +40,8 @@ describe('recurrence api endpoint integration tests', function() {
         .attach('seerDataFile',fixtures.DICTIONARY)
         .then( (res) => {
           expect(res).to.have.status(500);
-          expect(res.body).to.deep.include({ errors: [ { msg: 'system error' } ] });
+          expect(res.body).to.deep.include({ errors: [ { msg:
+          'An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.' } ] });
       });
     });
 

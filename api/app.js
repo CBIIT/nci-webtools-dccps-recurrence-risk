@@ -27,7 +27,8 @@ app.use('/recurrence', recurrenceRouter);
 
 app.use(function (err, req, res, next) {
   logger.log('error',err);
-  res.status(500).send({errors: [ { msg:"system error"} ]});
+  res.status(500).send({errors: [ {
+    msg:'An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.'} ]});
 });
 
 module.exports = app;

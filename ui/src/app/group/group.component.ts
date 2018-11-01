@@ -80,6 +80,11 @@ export class GroupComponent implements OnInit {
       this.handleSeerDataFileChange(file);
     });
 
+    this.groupDataForm.get('stageVariable').valueChanges.subscribe( (stageVar) => {
+      this.groupDataForm.patchValue({stageValue: ''}, {emitEvent: false});
+      this.errorMsg = '';
+    });
+
 	  router.events.subscribe( (event) => {
       if (event instanceof NavigationStart) {
         this.riskService.setCurrentState('group', {
@@ -143,12 +148,7 @@ export class GroupComponent implements OnInit {
       },
       (err) => {
         dialogRef.close();
-        if(typeof err === 'string') {
-          err = JSON.parse(err);
-        }
-        let errorObj = err.errors.pop();
-        errorObj.param = errorObj.param || '';
-        this.errorMsg = `Error: ${errorObj.param} ${errorObj.msg}`;
+        this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
         this.groupDataForm.setErrors({'invalid':true});
         this.dataSource.data = [];
     });
@@ -201,7 +201,7 @@ export class GroupComponent implements OnInit {
           dialogRef.close();
           this.groupMetadata = {};
           this.followup.max = 30;
-          this.errorMsg = "An error occurred with the submitted data, please make sure the form data is correct."
+          this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen."
         });
      }
   }
