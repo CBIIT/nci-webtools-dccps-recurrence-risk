@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var _ = require("underscore");
 var logger = require('./loggerUtil').logger;
 
 var writeFile = util.promisify(fs.writeFile);
@@ -10,15 +11,27 @@ var unlinkFile = util.promisify(fs.unlink);
 var readdir = util.promisify(fs.readdir);
 
 var workerFarm = require('worker-farm');
-var workers = workerFarm({
-       maxCallsPerWorker           : 20 //safe guard against memory leaks
+var emailWorkers = workerFarm({
+       workerOptions               : {env: _.extend({WORKER_TIMEOUT: 1000 * 60 * 60 * 2 }, process.env) } //2 hours and zap it
+     , maxCallsPerWorker           : 20 //safe guard against memory leaks
      , maxConcurrentWorkers        : 1  // 1 worker at a time
      , maxConcurrentCallsPerWorker : 2  // 2 tasks per worker
      , maxConcurrentCalls          : 10 // DOS setting, can crash if too many
      , maxCallTime                 : Infinity
      , maxRetries                  : 1
-     , autoStart                   : true
+     , autoStart                   : false
 }, require.resolve('../tasks/individualDataTask'));
+
+var webWorkers = workerFarm({
+       workerOptions               : {env: _.extend({WORKER_TIMEOUT: 1000 * 120}, process.env) } //2 minute and zap it
+     , maxCallsPerWorker           : 20 //safe guard against memory leaks
+     , maxConcurrentWorkers        : 1  // 1 web worker at a time
+     , maxConcurrentCallsPerWorker : 4  // 4 tasks per worker
+     , maxConcurrentCalls          : 20 // DOS setting, can crash if too many
+     , maxCallTime                 : Infinity // not using since it will timeout all tasks assigned to worker
+     , maxRetries                  : 1
+     , autoStart                   : false
+}, require.resolve('../tasks/recurrenceDataTask'));
 
 const queueMax = process.env.QUEUE_MAX || 50;
 const workingDir = path.normalize(path.join(__dirname ,'..','data'));
@@ -63,21 +76,27 @@ var extension = (element) => {
   return extName === '.json';
 };
 
-
 var _callIndividualTask = (input,workersHandle,cb) => {
  logger.log('info','Queue count: %s',queueCount);
  if(queueCount < queueMax) {
+   queueCount++;
    preProcessInput(input).then( (data) => {
      logger.log('info','resolved pre-process ....');
      workersHandle(data, (err,result) => {
        logger.log('info','Callback returned with result: ', result, err);
        queueCount--;
   	   postProcessInput(data).then( () => cb(err,result) ); });
-       queueCount++;
    });
  } else {
    throw new Error('Application is too busy, try again later.');
  }
+}
+
+var _getRecurrenceTask = (input,workersHandle,cb) => {
+	workersHandle(input, (err,result) => {
+      logger.log('info','Callback returned with result: ', result, err);
+ 	  cb(err,result);
+	});
 }
 
 var _init = (listener,readFileHandler) => {
@@ -96,5 +115,6 @@ var _init = (listener,readFileHandler) => {
   });
 }
 
-exports.callIndividualTask = (input,cb) => _callIndividualTask(input,workers,cb);
+exports.callIndividualTask = (input,cb) => _callIndividualTask(input,emailWorkers,cb);
+exports.getRecurrenceTask = (input,cb) => _getRecurrenceTask(input,webWorkers,cb);
 exports.init = (listener) => _init(listener,readFile);

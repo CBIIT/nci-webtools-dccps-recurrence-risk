@@ -1,6 +1,8 @@
 var R = require("../lib/r-script");
 var logger = require('../utils/loggerUtil').logger;
 
+const DEFAULT_WORKER_TIMEOUT = 1000*60*60*2; //2 hours
+
 function doIndividualDataTask(input,cb) {
   logger.log('info','doIndividualDataTask ==> received: ' ,input);
   let fileResult;
@@ -12,7 +14,10 @@ function doIndividualDataTask(input,cb) {
   //default attachment
   taskInput.mimeType = 'text/csv';
 
-  R("R/recurrence.R").data(taskInput).call((err,data) => {
+  logger.log('info','doIndividualDataTask ==> timeout in: ' ,process.env.WORKER_TIMEOUT || DEFAULT_WORKER_TIMEOUT);
+  R("R/recurrence.R").data(taskInput)
+    .withTimer(process.env.WORKER_TIMEOUT || DEFAULT_WORKER_TIMEOUT)
+    .call((err,data) => {
 
     if(err) {
       let errors = err.toString().split('\n');

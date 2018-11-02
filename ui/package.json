@@ -10,7 +10,7 @@
     "build-prod": "ng build --configuration=production",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "./node_modules/.bin/protractor ./e2e/protractor.conf.js"
   },
   "private": true,
   "dependencies": {
@@ -50,6 +50,7 @@
     "karma-coverage-istanbul-reporter": "~2.0.0",
     "karma-jasmine": "~1.1.1",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "path": "^0.12.7",
     "protractor": "^5.4.0",
     "ts-node": "~5.0.1",
     "tslint": "~5.9.1",

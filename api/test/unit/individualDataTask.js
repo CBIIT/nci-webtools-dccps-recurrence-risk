@@ -9,7 +9,13 @@ let task = rewire("../../tasks/individualDataTask");
 describe('recurrence individual data task tests', function() {
 
   it('test run task correctly', (done) => {
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => cb(null,['your_results']) }}} };
+    let mockRscript = (rscriptToRun) => {
+     return { data: (input) => {
+      return { withTimer: (input) => {
+        return { call: (cb) => cb(null,['your_results']) }}
+      }}
+      }
+    };
 
     task.__with__({
       R: mockRscript
@@ -28,7 +34,14 @@ describe('recurrence individual data task tests', function() {
 
   it('test run task with exception and send error email', (done) => {
     let bigError = new Error('not again!!');
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => { cb(bigError,null) }}}} };
+    let mockRscript = (rscriptToRun) => {
+      return { data: (input) => {
+        return { withTimer: (input) => {
+          return { call: (cb) => { cb(bigError,null) }}
+        }}
+      }}
+    };
+
     task.__with__({
       R: mockRscript
     })( () => {

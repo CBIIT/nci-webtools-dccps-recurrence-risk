@@ -11,7 +11,6 @@ describe('recurrence utility test', function() {
 
   it('should test callRecurrenceRisk successfully', (done) => {
     let mockEmailUtil = { sendMail: (err,data) => console.log(err,data)};
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { callSync: () => ['your_results'] }}} };
     let sendEmailSpy = sinon.spy(mockEmailUtil,'sendMail');
     let mockWorkerUtil = {
       init: () => console.log('init') ,
@@ -19,7 +18,6 @@ describe('recurrence utility test', function() {
      };
 
     util.__with__({
-      R: mockRscript,
       emailUtil: mockEmailUtil,
       workerUtil: mockWorkerUtil
     })( () => {
@@ -33,7 +31,6 @@ describe('recurrence utility test', function() {
 
   it('should test callRecurrenceRisk with error', (done) => {
     let mockEmailUtil = { sendMail: (err,data) => console.log(err,data)};
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { callSync: () => ['your_results'] }}} };
     let mockWorkerUtil = {
           init: () => console.log('init') ,
           callIndividualTask: (args,cb) => cb('error','done')
@@ -41,7 +38,6 @@ describe('recurrence utility test', function() {
     let sendEmailSpy = sinon.spy(mockEmailUtil,'sendMail');
 
     util.__with__({
-      R: mockRscript,
       workerUtil: mockWorkerUtil,
       emailUtil: mockEmailUtil
     })( () => {
@@ -55,7 +51,6 @@ describe('recurrence utility test', function() {
 
   it('should test callRecurrenceRisk with error due to server busy', (done) => {
     let mockEmailUtil = { sendMail: (err,data) => console.log(err,data)};
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { callSync: () => ['your_results'] }}} };
     let mockWorkerUtil = {
               init: () => console.log('init') ,
               callIndividualTask: (args,cb) => { throw Error('too busy, try again later') }
@@ -63,7 +58,6 @@ describe('recurrence utility test', function() {
     let sendEmailSpy = sinon.spy(mockEmailUtil,'sendMail');
 
     util.__with__({
-      R: mockRscript,
       workerUtil: mockWorkerUtil,
       emailUtil: mockEmailUtil
     })( () => {
@@ -79,14 +73,12 @@ describe('recurrence utility test', function() {
   });
 
   it('should test getRecurrenceRisk successfully', (done) => {
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => cb(null,['your_results']) }}} };
-    let farmMock = (options,task) => { return (args,cb) => { cb(null,'done'); } };
-    let workerMock = (args,cb) => { cb(null,'done'); };
 
+    let mockWorkerUtil = {
+      init: () => console.log('init') ,
+	  getRecurrenceTask: (args,cb) => { cb(null,'your_results'); } };
     util.__with__({
-      R: mockRscript,
-      workerFarm: farmMock,
-      workers: workerMock
+      workerUtil: mockWorkerUtil
     })( () => {
       util.getRecurrenceRisk({ covariate: 1.23})
         .then( (data) => {
@@ -99,14 +91,12 @@ describe('recurrence utility test', function() {
   });
 
   it('should test getRecurrenceRisk with exception', (done) => {
-    let mockRscript = (rscriptToRun) => { return { data: (input) => { return { call: (cb) => { cb('uh oh!!\noops')} }}} };
-    let farmMock = (options,task) => { return (args,cb) => { cb(null,'done'); } };
-    let workerMock = (args,cb) => { cb(null,'done'); };
-
+    let mockWorkerUtil = {
+	  init: () => console.log('init') ,
+	  getRecurrenceTask: (args,cb) => { cb(new Error('oops'),null); }
+	};
     util.__with__({
-      R: mockRscript,
-      workerFarm: farmMock,
-      workers: workerMock
+		workerUtil: mockWorkerUtil
     })( () => {
         util.getRecurrenceRisk({ covariate: 1.23}).catch( (err) => {
           expect(err).to.contain('oops');

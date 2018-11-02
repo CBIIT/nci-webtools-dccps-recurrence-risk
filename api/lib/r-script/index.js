@@ -4,13 +4,14 @@ var logger = require('../../utils/loggerUtil').logger;
 
 function init(path) {
   var obj = new R(path);
-  _.bindAll(obj, "data", "call", "callSync");
+  _.bindAll(obj, "data", "withTimer","call", "callSync");
   return obj;
 }
 
 function R(path) {
   this.d = {};
   this.path = path;
+  this.timeout = Infinity;
   this.options = {
     env: _.extend({DIRNAME: __dirname}, process.env),
     encoding: "utf8"
@@ -25,6 +26,11 @@ R.prototype.data = function() {
   }
   return this;
 };
+
+R.prototype.withTimer = function(_timeout) {
+  this.timeout = _timeout || Infinity;
+  return this;
+}
 
 R.prototype.call = function(_opts, _callback) {
   var callback = _callback || _opts;
@@ -51,6 +57,10 @@ R.prototype.call = function(_opts, _callback) {
       }
     }
   });
+
+  if(this.timeout !== Infinity) {
+    setTimeout( () => child.kill('SIGKILL') , this.timeout) ;
+  }
 };
 
 R.prototype.callSync = function(_opts) {

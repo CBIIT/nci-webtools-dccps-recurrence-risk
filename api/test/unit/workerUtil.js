@@ -32,7 +32,7 @@ describe('worker utility test', function() {
 
     util.__with__({
       workerFarm: farmMock,
-      workers: workerMock,
+      emailWorkers: workerMock,
     })( () => {
       util.callIndividualTask({stageVariable: 'coding'}, (err,result) => {
         expect(result).to.equal('done');

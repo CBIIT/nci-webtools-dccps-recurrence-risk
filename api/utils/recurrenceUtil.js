@@ -1,4 +1,3 @@
-var R = require("../lib/r-script");
 var util = require('util');
 var multer = require('multer');
 var emailUtil = require("../utils/recurrenceEmailUtil");
@@ -179,13 +178,11 @@ exports.parseAndValidateIndividualData= (req, res, next) => {
 }
 
 var getRecurrenceRisk = (args) => {
-  delete args.email;
-  delete args.seerCSVDataFileOriginalName
   return new Promise( (resolve,reject) => {
-    R("R/recurrence.R").data(args).call((err,data) => {
+    workerUtil.getRecurrenceTask(args, (err,data) => {
       if(err) {
         logger.log('error','getRecurrenceRisk error: ',err);
-        var errors = err.toString().split('\n');
+        var errors = err.message.split('\n');
         var errorMsg = errors.pop().trim();
         reject(errorMsg);
       } else {
@@ -198,7 +195,6 @@ var getRecurrenceRisk = (args) => {
 var callRecurrenceRisk = (args) => {
   workerUtil.callIndividualTask(args, (err,result) => {
 	logger.log('info','Callback returned with result and error',result,err);
-    //[todo] send generic error to user
     emailUtil.sendMail(err,result || { receivers: args.email});
   });
 }
