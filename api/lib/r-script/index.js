@@ -47,6 +47,7 @@ R.prototype.call = function(_opts, _callback) {
   child.stdout.on("data", (data) => dataBuff += data);
   child.on("close", (code,signal) => {
     if(errorBuff || code || signal) {
+      logger.log('error',`child process closed with code: ${code} or signal ${signal}`);
       callback(errorBuff || `process closed with code: ${code} or signal ${signal}`);
     } else {
       try {
