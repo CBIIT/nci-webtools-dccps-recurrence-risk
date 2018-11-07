@@ -41,7 +41,7 @@ exports.config = {
   }],
 
   //directConnect: true,
-  baseUrl: 'http://10.172.97.223:3000',
+  baseUrl: 'http://127.0.0.1:3000',
 
   // Code to start browserstack local before start of test
   beforeLaunch: function(){

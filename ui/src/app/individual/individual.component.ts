@@ -149,11 +149,11 @@ export class IndividualComponent implements OnInit {
     };
 
     this.fileUploadService.upload(options).subscribe( (response) => {
-
         if(response) {
           this.closeLoadingDialog();
           downloadFlag ? this.saveData(response) : this.displayData(response);
         } else {
+          this.individualDataForm.patchValue({email: ''});
           this.dialog.open(IndividualDialogComponent,
            { width: '400px',
              data: { infoOnly: true, message: 'Your calculations were submitted.' }

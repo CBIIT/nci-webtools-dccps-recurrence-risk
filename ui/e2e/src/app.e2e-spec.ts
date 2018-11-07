@@ -28,17 +28,19 @@ describe('workspace-project App', () => {
     page.getGroupCanSurvFileInput().sendKeys(csvCansurvFile);
     page.getDropdownByNameAndValue('stageVariable','SEER_historic_stage_LRD').click();
     page.getDropdownByNameAndValue('stageValue','2').click();
+
     page.getAdjustmentFactorInput().sendKeys('1');
-    page.getSliderForAction().slideTo(-100).perform();
+    page.moveSlider(2);// 2 tics to the right
     page.getSubmitButton().click();
 
     page.waitForDialogLoading(40);//wait up to 40 seconds
     //wait for loading dialog to disappear
-    expect(page.getTablePaginatorText()).toEqual('1 - 10 of 120');
+    expect(page.getTablePaginatorText()).toEqual('1 - 10 of 648');
   });
 
   it('should submit individual data form and get results', () => {
     page.navigateTo();
+    //page.waitForSpecificElementToBePresent('.browse-button',1000*60);
     page.getMenuDataButton('individual').click();
     page.getDataFileInput().sendKeys(csvIndividualFile);
     page.waitForDialogLoading();
@@ -48,10 +50,10 @@ describe('workspace-project App', () => {
     page.getDropdownByNameAndValue('stageVariable','agegroup').click();
     page.getDropdownByNameAndValue('distantStageValue','2').click();
     page.getAdjustmentFactorInput().sendKeys('1');
-    page.getSliderForAction().slideTo(-100).perform();
+    page.moveSlider(6).moveSlider(-1);// 6 tics to the right and 1 left
     page.getSubmitButton().click();
-    page.waitForDialogLoading(60); //wait up to 40 seconds
-    expect(page.getTablePaginatorText()).toEqual('1 - 4 of 4');
+    page.waitForDialogLoading(60); //wait up to 60 seconds
+    expect(page.getTablePaginatorText()).toEqual('1 - 7 of 7');
   });
 
 

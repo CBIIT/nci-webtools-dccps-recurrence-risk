@@ -195,8 +195,8 @@ describe('recurrence api endpoint integration tests', function() {
        });
     });
 
-    it('should call get individual data result for async request with year followup > 10', () => {
-        return chai.request(app)
+    it('should call get individual data result for async request with email triggering async response', (done) => {
+        chai.request(app)
        .post('/recurrence/individualData')
        .set('accept','application/json')
        .field('strata','yeargroup,agegroup')
@@ -212,7 +212,8 @@ describe('recurrence api endpoint integration tests', function() {
        .attach('seerCSVDataFile',fixtures.CSVDATA)
        .type('form')
        .then( (res) => {
-         expect(res).to.have.status(200);
+         expect(res).to.have.status(202);
+         setTimeout( () => done(), 20000);
        });
     });
 });

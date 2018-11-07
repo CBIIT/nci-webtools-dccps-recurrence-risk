@@ -8,11 +8,14 @@ exports.config = {
   specs: [
     './src/**/*.e2e-spec.ts'
   ],
-  capabilities: {
+  multiCapabilities: [{
     'browserName': 'chrome'
-  },
+  },{
+    'browserName': 'firefox'
+  }],
   directConnect: true,
-  baseUrl: 'http://localhost:3000/',
+  //baseUrl: 'http://nciws-d940-c.nci.nih.gov:8030',
+  baseUrl: 'http://127.0.0.1:3000',
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
