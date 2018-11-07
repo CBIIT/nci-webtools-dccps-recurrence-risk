@@ -106,8 +106,4 @@ export class AppPage {
     elm.style.opacity = 1;
   }
 
-  doWaitAbit() {
-    browser.sleep(60000);
-  }
-
 }

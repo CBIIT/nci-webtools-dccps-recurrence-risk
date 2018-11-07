@@ -14,7 +14,6 @@ exports.config = {
     'browserName': 'firefox'
   }],
   directConnect: true,
-  //baseUrl: 'http://nciws-d940-c.nci.nih.gov:8030',
   baseUrl: 'http://127.0.0.1:3000',
   framework: 'jasmine',
   jasmineNodeOpts: {
