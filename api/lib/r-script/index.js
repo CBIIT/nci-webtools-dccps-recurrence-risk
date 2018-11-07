@@ -60,7 +60,7 @@ R.prototype.call = function(_opts, _callback) {
   });
 
   if(this.timeout !== Infinity) {
-    setTimeout( () => child.kill('SIGKILL') , this.timeout) ;
+    setTimeout( () => child.kill('SIGTERM') , this.timeout) ;
   }
 };
 
