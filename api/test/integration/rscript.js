@@ -45,4 +45,17 @@ describe('recurrence rscript tests', function() {
         });
 
     });
+
+    it('test r scrip async timeout before the process completes', function(done) {
+      var attitude = JSON.parse(require("fs").readFileSync(fixtures.RDATAFILE, "utf8"));
+      R(fixtures.RASYNC)
+        .data({df: attitude, nGroups: 3, fxn: "mean" })
+        .withTimer(1)
+        .call(function(err, data) {
+          expect(err.toString()).to.contain('process closed with code: null or signal SIGTERM');
+          done();
+        });
+
+    });
+
 });

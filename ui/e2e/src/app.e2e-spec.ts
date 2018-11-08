@@ -52,7 +52,7 @@ describe('workspace-project App', () => {
     page.getAdjustmentFactorInput().sendKeys('1');
     page.moveSlider(6).moveSlider(-1);// 6 tics to the right and 1 left
     page.getSubmitButton().click();
-    page.waitForDialogLoading(60); //wait up to 60 seconds
+    page.waitForDialogLoading(120); //wait up to 120 seconds
     expect(page.getTablePaginatorText()).toEqual('1 - 7 of 7');
   });
 
