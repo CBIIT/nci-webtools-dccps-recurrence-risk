@@ -1,4 +1,5 @@
-var util = require('util');
+const util = require('util');
+const path = require('path');
 var multer = require('multer');
 var emailUtil = require("../utils/recurrenceEmailUtil");
 var events = require('events').EventEmitter;
@@ -20,6 +21,8 @@ workerListener.on('recover', (args) => {
 
 workerUtil.init(workerListener);
 
+const workingdir = path.normalize(path.join(__dirname ,'..','data'));
+
 var upload = multer({storage: multer.diskStorage({
    filename: (req, file, cb) => {
      var extension = "";
@@ -39,7 +42,8 @@ var upload = multer({storage: multer.diskStorage({
 
      var _filename = util.format('%s_%s.%s',req.requestId,type,extension);
      cb(null,_filename);
-   }
+   },
+   destination: (req,file, cb) => cb(null,workingdir)
  })
 });
 

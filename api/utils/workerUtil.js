@@ -34,7 +34,7 @@ var webWorkers = workerFarm({
 }, require.resolve('../tasks/recurrenceDataTask'));
 
 const queueMax = process.env.QUEUE_MAX || 50;
-const workingDir = path.normalize(path.join(__dirname ,'..','data'));
+const workingDir = path.normalize(path.join(__dirname ,'..','data/staging'));
 var queueCount = 0;
 
 

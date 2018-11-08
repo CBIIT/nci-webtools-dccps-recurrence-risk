@@ -39,6 +39,8 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
+              "deployUrl": "/recurrence/",
+              "baseHref": "/recurrence",
               "optimization": true,
               "outputHashing": "none",
               "sourceMap": false,
