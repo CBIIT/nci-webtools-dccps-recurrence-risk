@@ -6,7 +6,7 @@ export class AppPage {
   navigateTo() {
     //browser.driver.manage().window().setSize(1024, 768);
     browser.setFileDetector(new remote.FileDetector());
-    return browser.get('/');
+    return browser.get('./');
   }
 
   getParagraphText() {
