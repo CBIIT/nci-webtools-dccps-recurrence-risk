@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "nyc --check-coverage --lines 80 --functions 80 --branches 80 --reporter=html mocha --exit --recursive --timeout 30000"
+    "test": "nyc --cache --check-coverage --lines 80 --functions 80 --branches 80 --reporter=html mocha --recursive --timeout 30000 --exit"
   },
   "dependencies": {
     "cors": "^2.8.4",

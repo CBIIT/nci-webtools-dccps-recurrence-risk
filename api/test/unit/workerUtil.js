@@ -42,4 +42,18 @@ describe('worker utility test', function() {
     });
   });
 
+  it('should call getRecurrenceTask with success', (done) => {
+    var farmMock = (options,task) => { return (args,cb) => { cb(null,'done'); } };
+    var workerMock = (args,cb) => { cb(null,'done') };
+    util.__with__({
+      workerFarm: farmMock,
+      webWorkers: workerMock
+    })( () => {
+      util.getRecurrenceTask({stageVariable: 'var'}, (err,result) => {
+        expect(result).to.equal('done');
+        done();
+      });
+    });
+  });
+
 });

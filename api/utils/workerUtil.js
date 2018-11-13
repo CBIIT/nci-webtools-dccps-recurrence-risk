@@ -9,6 +9,7 @@ var readFile = util.promisify(fs.readFile);
 var copyFile = util.promisify(fs.copyFile);
 var unlinkFile = util.promisify(fs.unlink);
 var readdir = util.promisify(fs.readdir);
+var statFile = util.promisify(fs.stat);
 
 var workerFarm = require('worker-farm');
 var emailWorkers = workerFarm({
@@ -33,8 +34,12 @@ var webWorkers = workerFarm({
      , autoStart                   : false
 }, require.resolve('../tasks/recurrenceDataTask'));
 
+const maxFileAge = process.env.RECURRENCE_FILE_TTL_MINUTES || 15; //default 15 minutes
+const fileCleanInterval = process.env.RECURRENCE_FILE_CLEAN_MINUTES || 5; //default 5 minutes
 const queueMax = process.env.QUEUE_MAX || 50;
-const workingDir = path.normalize(path.join(__dirname ,'..','data/staging'));
+const workingDir = path.normalize(path.join(__dirname ,'..','data'));
+const workingDirStaged = path.normalize(path.join(__dirname ,'..','data/staging'));
+
 var queueCount = 0;
 
 
@@ -43,8 +48,8 @@ var preProcessInput = (data) => {
     delete data.isRecovery;
 	return Promise.resolve(data);
   } else {
-    var seerCSVDataFileInput = path.join(workingDir,util.format('%s_data.csv',data.requestId));
-	var seerCSVDataFileRequest = path.join(workingDir,util.format('%s_input.json',data.requestId));
+    var seerCSVDataFileInput = path.join(workingDirStaged,util.format('%s_data.csv',data.requestId));
+	var seerCSVDataFileRequest = path.join(workingDirStaged,util.format('%s_input.json',data.requestId));
 
     return new Promise( (resolve,reject) => {
       var seerCSVDataFileTemp = data.seerCSVDataFile;
@@ -60,8 +65,8 @@ var preProcessInput = (data) => {
 }
 
 var postProcessInput = (data) => {
-  var seerCSVDataFileInput = path.join(workingDir,util.format('%s_data.csv',data.requestId));
-  var seerCSVDataFileRequest = path.join(workingDir,util.format('%s_input.json',data.requestId));
+  var seerCSVDataFileInput = path.join(workingDirStaged,util.format('%s_data.csv',data.requestId));
+  var seerCSVDataFileRequest = path.join(workingDirStaged,util.format('%s_input.json',data.requestId));
   return new Promise( (resolve,reject) => {
    unlinkFile(seerCSVDataFileInput)
     .catch( (err) => logger.log('info','Could not delete file input csv %s',err))
@@ -99,10 +104,33 @@ var _getRecurrenceTask = (input,workersHandle,cb) => {
 	});
 }
 
+var _end = () => {
+  let finished = (name) => logger.log('info','worker name: %s was ended.',name);
+  workerFarm.end(emailWorkers,finished('email-worker'));
+  workerFarm.end(webWorkers),finished('web-worker');
+}
+
 var _init = (listener,readFileHandler) => {
-  readdir(workingDir).then( (files) => {
+  setInterval( () => {
+    readdir(workingDir).then( (files) => {
+      files.forEach( (fileName) => {
+        statFile(path.join(workingDir,fileName))
+        .then( (stats) => {
+          let minutes = (new Date().getTime() - new Date(stats.mtime).getTime()) / (1000*60);
+          logger.log('info','File %s was last accessed %d minutes',fileName,minutes);
+          if(stats.isFile() && minutes > maxFileAge) {
+            unlinkFile(path.join(workingDir,fileName))
+            .then( () => logger.log('info','fileName: %s was removed successfully',fileName))
+            .catch( (err) => logger.log('error','There was an issue removing fileName: %s',fileName,err));
+          }
+        }).catch((err) => logger.log('error','something went wrong with getting statistics for file %s',fileName,err));
+      });
+    });
+  }, fileCleanInterval * 1000 * 60 );
+
+  readdir(workingDirStaged).then( (files) => {
     files.filter(extension).forEach( (fileName) => {
-    readFileHandler(path.join(workingDir,fileName)).then( (data) => {
+    readFileHandler(path.join(workingDirStaged,fileName)).then( (data) => {
       try {
         let recoverData = JSON.parse(data);
         recoverData.isRecovery = true;
@@ -118,3 +146,4 @@ var _init = (listener,readFileHandler) => {
 exports.callIndividualTask = (input,cb) => _callIndividualTask(input,emailWorkers,cb);
 exports.getRecurrenceTask = (input,cb) => _getRecurrenceTask(input,webWorkers,cb);
 exports.init = (listener) => _init(listener,readFile);
+exports.end = () => _end();

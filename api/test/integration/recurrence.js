@@ -11,6 +11,11 @@ describe('recurrence api endpoint integration tests', function() {
 
     process.env.SMTP_HOST = 'testhost';
     let app = require('../../app');
+    let workerUtil = require('../../utils/workerUtil');
+
+    after(() => {
+      workerUtil.end();
+    });
 
     it('should call get group metadata api endpoint and get metadata', () => {
       return chai.request(app)

@@ -11,7 +11,7 @@ methods <- c("handleGroupMetadata","handleIndividualMetadata",
   "handleRecurrenceRiskGroup", "handleRecurrenceRiskIndividual")
 
 handleInterface <- function(args) {
-  cat("Handle interface called","\n", file = stdout())
+  #cat("Handle interface called","\n", file = stdout())
   method = args$method
   stopifnot( exists("method"), match(method,methods) > 0 )
   args$method = NULL
@@ -19,7 +19,7 @@ handleInterface <- function(args) {
 }
 
 handleGroupMetadata <- function(requestId,seerDictionaryFile,seerDataFile) {
-  cat("handleGroupMetadata() ",requestId,"\n", file = stdout())
+  #cat("handleGroupMetadata() ",requestId,"\n", file = stdout())
   stopifnot(exists("seerDictionaryFile"),exists("seerDataFile"),
   file.exists(seerDictionaryFile),file.exists(seerDataFile))
   seerData = read.SeerStat(seerDictionaryFile,seerDataFile)
@@ -39,7 +39,7 @@ handleGroupMetadata <- function(requestId,seerDictionaryFile,seerDataFile) {
 }
 
 handleIndividualMetadata <- function(requestId,seerCSVDataFile) {
-  cat("handleIndividualMetadata() ",requestId,"\n", file = stdout())
+  #cat("handleIndividualMetadata() ",requestId,"\n", file = stdout())
   stopifnot(exists("seerCSVDataFile"),file.exists(seerCSVDataFile))
   seerData = fread(seerCSVDataFile)
   seerVars = choices.vars(seerData)
@@ -52,7 +52,7 @@ handleIndividualMetadata <- function(requestId,seerCSVDataFile) {
 
 handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFile, canSurvDataFile,
   stageVariable, stageValue, adjustmentFactor, yearsOfFollowUp, workingDirectory, mimeType) {
-  cat("handleRecurrenceRiskGroup() ",requestId,"\n", file = 'r.out.log',  append = T)
+  #cat("handleRecurrenceRiskGroup() ",requestId,"\n", file = 'r.out.log',  append = T)
   stopifnot(exists("seerDictionaryFile"),exists("seerDataFile"),exists('canSurvDataFile'),
     file.exists(seerDictionaryFile),file.exists(seerDataFile),file.exists(canSurvDataFile))
   seerData = read.SeerStat(seerDictionaryFile,seerDataFile)
@@ -69,7 +69,7 @@ handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFil
     resultFilePath = file.path(workingDirectory,paste0(requestId,"_result.json"))
     write_json(dataTable,resultFilePath,na = "string", digits = NA, auto_unbox = T, dataframe = "rows")
   }
-  cat("handleRecurrenceRiskGroup() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
+  #cat("handleRecurrenceRiskGroup() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
   return(resultFilePath)
 }
 
@@ -77,7 +77,7 @@ handleRecurrenceRiskGroup <- function(requestId, seerDictionaryFile, seerDataFil
 handleRecurrenceRiskIndividual <- function(requestId, seerCSVDataFile, strata,
   covariates, timeVariable, eventVariable, distribution, stageVariable, distantStageValue,
   adjustmentFactor, yearsOfFollowUp, workingDirectory, mimeType) {
-  cat("handleRecurrenceRiskIndividual() ",requestId,"\n", file = 'r.out.log',  append = T)
+  #cat("handleRecurrenceRiskIndividual() ",requestId,"\n", file = 'r.out.log',  append = T)
   stopifnot(exists("seerCSVDataFile"),file.exists(seerCSVDataFile))
   seerData = fread(seerCSVDataFile)
 
@@ -96,11 +96,11 @@ handleRecurrenceRiskIndividual <- function(requestId, seerCSVDataFile, strata,
     resultFilePath = file.path(workingDirectory,paste0(requestId,"_result.json"))
     write_json(dataTable,resultFilePath,na = "string", digits = NA, auto_unbox = T, dataframe = "rows")
   }
-  cat("handleRecurrenceRiskIndividual() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
+  #cat("handleRecurrenceRiskIndividual() ",resultFilePath,"\n", file = 'r.out.log',  append = T)
   return(resultFilePath)
 }
 
 stopifnot(exists("input"))
 args = input[[1]]
-cat("Interface: input exists","\n", file = stdout())
+#cat("Interface: input exists","\n", file = stdout())
 handleInterface(args)
