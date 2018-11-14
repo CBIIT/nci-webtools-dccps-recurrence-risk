@@ -9,7 +9,7 @@
                <mat-label>Browse...</mat-label>
              </td-file-input>
               <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
-                           (fileDrop)="groupDataForm.value.seerDictionaryFile = $event"
+                           (fileDrop)="patchValueHelper({seerDictionaryFile: $event})"
                            (click)="dicFileInput.inputElement.click()"
                            (keyup.enter)="dicFileInput.inputElement.click()"
                            (keyup.delete)="dicFileInput.clear()"
@@ -26,7 +26,7 @@
                <mat-label>Browse...</mat-label>
              </td-file-input>
              <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
-                             (fileDrop)="groupDataForm.value.seerDataFile = $event"
+                             (fileDrop)="patchValueHelper({seerDataFile: $event})"
                              (click)="dataFileInput.inputElement.click()"
                              (keyup.enter)="dataFileInput.inputElement.click()"
                              (keyup.delete)="dataFileInput.clear()"
@@ -43,7 +43,7 @@
                <mat-label>Browse...</mat-label>
              </td-file-input>
              <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
-                             (fileDrop)="groupDataForm.value.canSurvDataFile = $event"
+                             (fileDrop)="patchValueHelper({canSurvDataFile: $event})"
                              (click)="canSurvFileInput.inputElement.click()"
                              (keyup.enter)="canSurvFileInput.inputElement.click()"
                              (keyup.delete)="canSurvFileInput.clear()"

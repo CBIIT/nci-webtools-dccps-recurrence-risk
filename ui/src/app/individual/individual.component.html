@@ -9,7 +9,7 @@
             <mat-label>Browse...</mat-label>
           </td-file-input>
           <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
-                          (fileDrop)="individualDataForm.value.seerCSVDataFile = $event"
+                          (fileDrop)="patchValueHelper({seerCSVDataFile: $event})"
                           (click)="dataFileInput.inputElement.click()"
                           (keyup.enter)="dataFileInput.inputElement.click()"
                           (keyup.delete)="dataFileInput.clear()"

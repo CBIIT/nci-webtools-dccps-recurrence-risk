@@ -222,8 +222,8 @@ export class GroupComponent implements OnInit {
   }
 
   applyFilter(filterValue: string) {
-      this.dataSource.filter = filterValue.trim().toLowerCase();
-    }
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
 
   isNumber(value:any) {
     return !isNaN(value);
@@ -249,6 +249,10 @@ export class GroupComponent implements OnInit {
 
   getErrorMessage(): String {
     return this.errorMsg;
+  }
+
+  patchValueHelper(chunk:any) {
+    this.groupDataForm.patchValue(chunk,{emitEvent: false});
   }
 
 }

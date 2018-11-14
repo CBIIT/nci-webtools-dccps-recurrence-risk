@@ -300,6 +300,10 @@ export class IndividualComponent implements OnInit {
     return (covariatesVal && covariatesVal.length > 0)
       || (strataVal && strataVal.length > 2)
   }
+
+  patchValueHelper(chunk:any) {
+    this.individualDataForm.patchValue(chunk,{emitEvent: false});
+  }
 }
 
 @Component({
