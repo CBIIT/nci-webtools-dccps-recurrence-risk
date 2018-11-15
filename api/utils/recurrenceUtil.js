@@ -23,7 +23,8 @@ workerUtil.init(workerListener);
 
 const workingdir = path.normalize(path.join(__dirname ,'..','data'));
 
-var upload = multer({storage: multer.diskStorage({
+var upload = multer(
+{storage: multer.diskStorage({
    filename: (req, file, cb) => {
      var extension = "";
      var type = "none";
@@ -44,7 +45,8 @@ var upload = multer({storage: multer.diskStorage({
      cb(null,_filename);
    },
    destination: (req,file, cb) => cb(null,workingdir)
- })
+ }),
+ limits: { fileSize: 500 * 1024 * 1024 /* 500MB max, make this a config?*/ }
 });
 
 exports.groupMetadataFileUpload = upload.fields([
