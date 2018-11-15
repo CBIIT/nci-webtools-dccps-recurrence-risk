@@ -1,4 +1,5 @@
 var express = require('express');
+var helmet = require('helmet');
 var cors = require('cors');
 
 var logger = require('./utils/loggerUtil').logger;
@@ -9,6 +10,7 @@ const uuid = require('uuid/v1');
 
 var app = express();
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
