@@ -16,7 +16,7 @@ var emailWorkers = workerFarm({
        workerOptions               : {env: _.extend({WORKER_TIMEOUT: 1000 * 60 * 60 * 2 }, process.env) } //2 hours and zap it
      , maxCallsPerWorker           : 20 //safe guard against memory leaks
      , maxConcurrentWorkers        : 1  // 1 worker at a time
-     , maxConcurrentCallsPerWorker : 2  // 2 tasks per worker
+     , maxConcurrentCallsPerWorker : 1  // 1 tasks per worker
      , maxConcurrentCalls          : 10 // DOS setting, can crash if too many
      , maxCallTime                 : Infinity
      , maxRetries                  : 1
@@ -24,7 +24,7 @@ var emailWorkers = workerFarm({
 }, require.resolve('../tasks/individualDataTask'));
 
 var webWorkers = workerFarm({
-       workerOptions               : {env: _.extend({WORKER_TIMEOUT: 1000 * 120}, process.env) } //2 minute and zap it
+       workerOptions               : {env: _.extend({WORKER_TIMEOUT: 1000 * 300}, process.env) } //5 minutes and zap it
      , maxCallsPerWorker           : 20 //safe guard against memory leaks
      , maxConcurrentWorkers        : 1  // 1 web worker at a time
      , maxConcurrentCallsPerWorker : 4  // 4 tasks per worker
