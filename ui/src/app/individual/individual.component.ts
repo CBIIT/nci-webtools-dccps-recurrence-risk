@@ -160,6 +160,7 @@ export class IndividualComponent implements OnInit {
            });
         }
     }, (err) => {
+        this.individualDataForm.patchValue({email: ''});
         this.closeLoadingDialog();
         this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
         this.individualDataForm.setErrors({'invalid':true});
