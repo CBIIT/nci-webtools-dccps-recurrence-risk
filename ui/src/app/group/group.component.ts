@@ -148,9 +148,8 @@ export class GroupComponent implements OnInit {
       },
       (err) => {
         dialogRef.close();
-        this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
-        this.groupDataForm.setErrors({'invalid':true});
         this.dataSource.data = [];
+        this.handleErrorMessage(err);
     });
   }
 
@@ -186,22 +185,24 @@ export class GroupComponent implements OnInit {
       this.fileUploadService.upload(options).subscribe(
         (response) => {
           dialogRef.close();
-          this.groupDataForm.patchValue(
-                      { stageVariable: '',
-                        stageValue: '',
-                        adjustmentFactor: '1',
-                        yearsOfFollowUp: '25'}, {emitEvent: false} );
           let metadata = JSON.parse(response);
           this.groupMetadata = metadata;
           this.followup.max = this.groupMetadata.maxFollowUp[0];
           this.errorMsg = '';
+          this.groupDataForm.patchValue(
+            { stageVariable: '',
+              stageValue: '',
+              adjustmentFactor: '1',
+              yearsOfFollowUp: Math.min(this.followup.max,this.groupDataForm.get('yearsOfFollowUp').value)
+            }, {emitEvent: false} );
           this.groupDataForm.markAsUntouched();
         },
         (err) => {
           dialogRef.close();
           this.groupMetadata = {};
+          this.dataSource.data = [];
           this.followup.max = 30;
-          this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen."
+          this.handleErrorMessage(err);
         });
      }
   }
@@ -221,8 +222,29 @@ export class GroupComponent implements OnInit {
     FileSaver.saveAs(blob, 'groupData.csv');
   }
 
+  handleErrorMessage(response) {
+    let errorObj = JSON.parse(response || '{}');
+    if(errorObj && errorObj.errors && errorObj.errors.length > 0) {
+      let error = errorObj.errors.pop();
+      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg}`;
+    } else {
+      this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
+    }
+    this.groupDataForm.setErrors({'invalid':true});
+    }
+
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  valuesForVariable() : any[] {
+    let variable = this.groupDataForm.get('stageVariable').value;
+  	let values = this.groupMetadata['values'];
+  	return values ? values[variable] : [];
+  }
+
+  patchValueHelper(chunk:any) {
+    this.groupDataForm.patchValue(chunk,{emitEvent: false});
   }
 
   isNumber(value:any) {
@@ -235,24 +257,6 @@ export class GroupComponent implements OnInit {
     } else {
       return value;
     }
-  }
-  
-  valuesForVariable() : any[] {
-    let variable = this.groupDataForm.get('stageVariable').value;	  
-	  let values = this.groupMetadata['values'];
-	  if(values) {
-	  	return values[variable];
-	  } else {
-	  	return [];
-	  }
-  }
-
-  getErrorMessage(): String {
-    return this.errorMsg;
-  }
-
-  patchValueHelper(chunk:any) {
-    this.groupDataForm.patchValue(chunk,{emitEvent: false});
   }
 
 }

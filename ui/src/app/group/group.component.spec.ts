@@ -207,7 +207,7 @@ describe('GroupComponent', () => {
 
   it('should load seer form meta data from dictionary and data with error' , async( inject( [TdFileService],(mockFileService: TdFileService) => {
      let loadSeerFormDataSpy = spyOn(component,'loadSeerFormData').and.callThrough();
-     let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(throwError( new Error('oops!')));
+     let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(throwError('{"errors": [{"msg": "oops!"}]}'));
      let fileInputComponents = debugElement.queryAll(By.directive(TdFileInputComponent));
      let dicFileInputComponent = fileInputComponents.find( (iel) => iel.attributes.formControlName == 'seerDictionaryFile' );
      let dataFileInputComponent = fileInputComponents.find( (iel) => iel.attributes.formControlName == 'seerDataFile' );
@@ -298,7 +298,7 @@ describe('GroupComponent', () => {
      fixture.detectChanges();
 
      let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(
-             throwError({ errors: [ {msg: 'oops!'} ] }));
+             throwError('{ "errors": [ {"msg": "oops!"} ] }'));
      spyOn(component,'loadSeerFormData').and.callFake( () => true);
 
      component.groupDataForm.setValue(

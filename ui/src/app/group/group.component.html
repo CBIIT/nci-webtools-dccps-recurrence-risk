@@ -99,7 +99,7 @@
        <mat-card-content  >
          <mat-tab-group>
            <mat-tab label="Output">
-             <mat-error *ngIf="groupDataForm.invalid">{{getErrorMessage()}}</mat-error>
+             <mat-error *ngIf="groupDataForm.invalid">{{errorMsg}}</mat-error>
              <mat-form-field appearance="standard" fxLayout="row" fxLayoutAlign="start stretch">
                <mat-label>Search Filter</mat-label>
                <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Filter">

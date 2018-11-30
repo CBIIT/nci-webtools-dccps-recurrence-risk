@@ -6,6 +6,7 @@ import { MatPaginator,
   MatSort ,
   MatDialog,
   MatDialogRef,
+  MatOptionSelectionChange,
   MAT_DIALOG_DATA } from '@angular/material';
 import { TdFileService, TdFileInputComponent, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
@@ -38,6 +39,8 @@ export class IndividualComponent implements OnInit {
     'se_CI_analytical',
     'obs_surv',
     'obs_dist_surv' ];
+
+  selectionGroup: any = {};
 
   displayedColumns: string[] = [];
 
@@ -77,7 +80,7 @@ export class IndividualComponent implements OnInit {
       distribution: [''],
       stageVariable: [''],
       distantStageValue: [''],
-      adjustmentFactor: [''],
+      adjustmentFactor: ['1'],
       yearsOfFollowUp: ['2'],
       email: ['']
     });
@@ -97,6 +100,7 @@ export class IndividualComponent implements OnInit {
       let valuesMap = this.individualMetadata['values'];
       if(valuesMap && valuesMap[timeVar] && valuesMap[timeVar].length > 0 ) {
         this.followup.max = valuesMap[timeVar][valuesMap[timeVar].length-1];
+        this.patchValueHelper({ yearsOfFollowUp: Math.min(this.followup.max,this.individualDataForm.get('yearsOfFollowUp').value) });
       }
 
     });
@@ -107,11 +111,11 @@ export class IndividualComponent implements OnInit {
           data: this.dataSource.data,
           metadata: this.individualMetadata,
           form: this.individualDataForm.value,
-          dispColumns: this.displayedColumns
+          dispColumns: this.displayedColumns,
+          selectionGroup: this.selectionGroup
         });
       }
     });
-
   }
 
   ngOnInit() {
@@ -124,6 +128,7 @@ export class IndividualComponent implements OnInit {
     this.individualDataForm.patchValue({ timeVariable: state.form.timeVariable }, {emitEvent: true});
     this.displayedColumns = state.dispColumns || this.CORE_COLUMNS.slice();
     this.columnsToDisplay = state.dispColumns || this.displayedColumns;
+    this.selectionGroup = state.selectionGroup || this.selectionGroup;
     this.dataFileSelect.inputElement.setAttribute('aria-label','data file');
   }
 
@@ -162,9 +167,8 @@ export class IndividualComponent implements OnInit {
     }, (err) => {
         this.individualDataForm.patchValue({email: ''});
         this.closeLoadingDialog();
-        this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
-        this.individualDataForm.setErrors({'invalid':true});
         this.dataSource.data = [];
+        this.handleErrorMessage(err);
     });
   }
 
@@ -218,6 +222,7 @@ export class IndividualComponent implements OnInit {
          this.closeLoadingDialog();
          let metadata = JSON.parse(response);
          this.individualMetadata = metadata;
+         this.selectionGroup = {};
          this.individualDataForm.patchValue({
           strata: '',
           covariates: '',
@@ -226,7 +231,7 @@ export class IndividualComponent implements OnInit {
           distribution: '',
           stageVariable: '',
           distantStageValue: '',
-          adjustmentFactor: '',
+          adjustmentFactor: '1',
           yearsOfFollowUp: '2'}, {emitEvent: false});
          this.errorMsg = '';
          this.individualDataForm.markAsUntouched();
@@ -234,7 +239,8 @@ export class IndividualComponent implements OnInit {
        (err) => {
          this.closeLoadingDialog();
          this.individualMetadata = {};
-         this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen."
+         this.selectionGroup = {};
+         this.handleErrorMessage(err);
        });
     }
   }
@@ -273,15 +279,18 @@ export class IndividualComponent implements OnInit {
   valuesForVariable() : any[] {
     let variable = this.individualDataForm.get('stageVariable').value;
   	let values = this.individualMetadata['values'];
-  	if(values) {
-  		return values[variable];
-  	} else {
-  		return [];
-  	}
+  	return values? values[variable] : [];
   }
 
-  getErrorMessage(): String {
-    return this.errorMsg;
+  handleErrorMessage(response) {
+    let errorObj = JSON.parse(response || '{}');
+    if(errorObj && errorObj.errors && errorObj.errors.length > 0) {
+      let error = errorObj.errors.pop();
+      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg}`;
+    } else {
+      this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
+    }
+    this.individualDataForm.setErrors({'invalid':true});
   }
 
   closeLoadingDialog() {
@@ -304,6 +313,15 @@ export class IndividualComponent implements OnInit {
 
   patchValueHelper(chunk:any) {
     this.individualDataForm.patchValue(chunk,{emitEvent: false});
+  }
+
+  handleSelectionGroup(event:MatOptionSelectionChange) {
+    this.selectionGroup[event.source.value] = event.source.selected;
+  }
+
+  isSelectionGroupDisabled(selectedOptionsForInput:any,option:string): boolean {
+    let options =  selectedOptionsForInput ? [].concat(selectedOptionsForInput) : [];
+    return this.selectionGroup[option] && (options.indexOf(option) < 0);
   }
 }
 

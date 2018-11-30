@@ -23,7 +23,9 @@
         <mat-form-field appearance="outline">
           <mat-label>Strata</mat-label>
           <mat-select formControlName="strata" multiple>
-            <mat-option *ngFor="let strataVar of individualMetadata?.variables" [value]="strataVar">
+            <mat-option *ngFor="let strataVar of individualMetadata?.variables" [value]="strataVar"
+                        [disabled]="isSelectionGroupDisabled(individualDataForm.value.strata,strataVar)"
+                        (onSelectionChange)="handleSelectionGroup($event)">
               {{strataVar}}
             </mat-option>
           </mat-select>
@@ -32,7 +34,9 @@
         <mat-form-field appearance="outline">
           <mat-label>Covariates</mat-label>
           <mat-select formControlName="covariates" multiple>
-            <mat-option *ngFor="let covariatesVar of individualMetadata?.variables" [value]="covariatesVar">
+            <mat-option *ngFor="let covariatesVar of individualMetadata?.variables" [value]="covariatesVar"
+                        [disabled]="isSelectionGroupDisabled(individualDataForm.value.covariates,covariatesVar)"
+                        (onSelectionChange)="handleSelectionGroup($event)">
               {{covariatesVar}}
             </mat-option>
           </mat-select>
@@ -41,7 +45,9 @@
         <mat-form-field appearance="outline">
           <mat-label>Time Variable</mat-label>
           <mat-select formControlName="timeVariable" required>
-            <mat-option *ngFor="let timeVar of individualMetadata?.variables" [value]="timeVar">
+            <mat-option *ngFor="let timeVar of individualMetadata?.variables" [value]="timeVar"
+                        [disabled]="isSelectionGroupDisabled(individualDataForm.value.timeVariable,timeVar)"
+                        (onSelectionChange)="handleSelectionGroup($event)">
               {{timeVar}}
             </mat-option>
           </mat-select>
@@ -50,7 +56,9 @@
         <mat-form-field appearance="outline">
           <mat-label>Event Variable</mat-label>
           <mat-select formControlName="eventVariable" required>
-            <mat-option *ngFor="let eventVar of individualMetadata?.variables" [value]="eventVar">
+            <mat-option *ngFor="let eventVar of individualMetadata?.variables" [value]="eventVar"
+                        [disabled]="isSelectionGroupDisabled(individualDataForm.value.eventVariable,eventVar)"
+                        (onSelectionChange)="handleSelectionGroup($event)">
               {{eventVar}}
             </mat-option>
           </mat-select>
@@ -112,7 +120,7 @@
     <mat-card-content>
       <mat-tab-group>
         <mat-tab label="Output">
-          <mat-error *ngIf="individualDataForm.invalid">{{getErrorMessage()}}</mat-error>
+          <mat-error *ngIf="individualDataForm.invalid">{{errorMsg}}</mat-error>
           <mat-form-field appearance="standard" fxLayout="row" fxLayoutAlign="start stretch">
             <mat-label>Search Filter</mat-label>
             <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Filter">

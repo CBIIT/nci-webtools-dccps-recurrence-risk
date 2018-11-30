@@ -261,7 +261,7 @@ describe('IndividualComponent', () => {
     fixture.detectChanges();
 
     let uploadSpy = spyOn(mockFileService,'upload').and.returnValue(
-            throwError( { errors: [ {msg: 'oops!'} ] } ));
+            throwError( '{ "errors": [ {"msg": "oops!"} ] }' ));
     spyOn(component,'loadSeerFormData').and.callFake( () => true);
 
     component.individualDataForm.setValue(
