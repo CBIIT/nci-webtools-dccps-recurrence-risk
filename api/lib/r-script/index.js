@@ -48,7 +48,7 @@ R.prototype.call = function(_opts, _callback) {
   child.on("close", (code,signal) => {
     if(errorBuff || code || signal) {
       logger.log('error',`child process closed with error: ${errorBuff} code: ${code} or signal: ${signal}`);
-      callback(errorBuff || `child process closed with error: ${errorBuff} code: ${code} or signal: ${signal}`);
+      callback(errorBuff || 'An unknown error occurred.');
     } else {
       try {
         callback(null,JSON.parse(dataBuff));

@@ -52,7 +52,7 @@ describe('recurrence rscript tests', function() {
         .data({df: attitude, nGroups: 3, fxn: "mean" })
         .withTimer(1)
         .call(function(err, data) {
-          expect(err.toString()).to.contain('child process closed with error:  code: null or signal: SIGTERM');
+          expect(err.toString()).to.contain('An unknown error occurred.');
           done();
         });
 
