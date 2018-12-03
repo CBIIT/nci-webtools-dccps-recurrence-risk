@@ -60,6 +60,9 @@ export class GroupComponent implements OnInit {
 
   errorMsg: string = "";
 
+  defaultErrorMsg: string = "An unexpected error occured. Please ensure the input file(s) is in the correct"
+      + "format and/or correct parameters were chosen.";
+
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
     private riskService: RecurrenceRiskService,private router: Router,private dialog: MatDialog) {
     this.groupDataForm = formBuilder.group({
@@ -226,12 +229,12 @@ export class GroupComponent implements OnInit {
     let errorObj = JSON.parse(response || '{}');
     if(errorObj && errorObj.errors && errorObj.errors.length > 0) {
       let error = errorObj.errors.pop();
-      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg}`;
+      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg || this.defaultErrorMsg}`;
     } else {
-      this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
+      this.errorMsg = this.defaultErrorMsg;
     }
     this.groupDataForm.setErrors({'invalid':true});
-    }
+  }
 
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();

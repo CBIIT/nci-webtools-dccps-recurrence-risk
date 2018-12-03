@@ -62,6 +62,9 @@ export class IndividualComponent implements OnInit {
 
   errorMsg: string = "";
 
+  defaultErrorMsg: string = "An unexpected error occured. Please ensure the input file(s) is in the correct"
+    + "format and/or correct parameters were chosen.";
+
   followup: any = {
       max: 2,
       min: 1,
@@ -286,9 +289,9 @@ export class IndividualComponent implements OnInit {
     let errorObj = JSON.parse(response || '{}');
     if(errorObj && errorObj.errors && errorObj.errors.length > 0) {
       let error = errorObj.errors.pop();
-      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg}`;
+      this.errorMsg = error.param ? `${error.msg} for ${error.param}` : `${error.msg || this.defaultErrorMsg}`;
     } else {
-      this.errorMsg = "An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.";
+      this.errorMsg = this.defaultErrorMsg;
     }
     this.individualDataForm.setErrors({'invalid':true});
   }
@@ -330,7 +333,6 @@ export class IndividualComponent implements OnInit {
   templateUrl: 'individual-dialog.component.html',
 })
 export class IndividualDialogComponent {
-
   constructor(
     public dialogRef: MatDialogRef<IndividualDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any) {
@@ -339,5 +341,4 @@ export class IndividualDialogComponent {
   onNoClick(): void {
     this.dialogRef.close();
   }
-
 }
