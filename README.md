@@ -4,6 +4,8 @@ This web application has been developed to estimate the risk of progressing to d
 
 ## Developent Setup
 
+The R Project for Statistical Computing is required to be installed since the application interfaces with R functions.
+
 The application is divided in to two components; UI and API. The UI is built on Angular 6 and the API is an Express.js REST based backend.
 
 ### Installation
