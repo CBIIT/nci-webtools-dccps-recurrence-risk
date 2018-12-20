@@ -5,13 +5,12 @@ var cors = require('cors');
 var logger = require('./utils/loggerUtil').logger;
 var indexRouter = require('./routes/index');
 var recurrenceRouter = require('./routes/recurrence');
-var router = require( 'express-router-ping' );
 
 const uuid = require('uuid/v1');
 
+
 var app = express();
 
-app.use( '/', router );
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -27,7 +26,9 @@ app.use( (req,res,next) => {
 app.get('/', (req,res) => res.sendFile('index.html',{ root: __dirname + "/public" } ));
 app.use('/recurrence', recurrenceRouter);
 
-
+app.get('/ping', (req, res) => {
+  res.send('true');
+});
 
 app.use(function (err, req, res, next) {
   logger.log('error',err);
