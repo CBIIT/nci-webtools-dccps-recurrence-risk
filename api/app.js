@@ -27,7 +27,7 @@ app.get('/', (req,res) => res.sendFile('index.html',{ root: __dirname + "/public
 app.use('/recurrence', recurrenceRouter);
 
 app.get('/ping', (req, res) => {
-  res.send('True');
+  res.send('true');
 });
 
 app.use(function (err, req, res, next) {
