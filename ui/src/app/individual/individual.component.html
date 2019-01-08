@@ -98,13 +98,17 @@
 
         <span id="yearsOfFollowUpLabel" class="normal-form-spacing">Years of Follow-up:</span>
         <mat-slider formControlName="yearsOfFollowUp" color="accent"
-                    [max]="followup.max"
-                    [min]="followup.min"
-                    [step]="followup.step"
-                    [tickInterval]="followup.interval"
-                    thumbLabel aria-labelledby="yearsOfFollowUpLabel">
+            [max]="followup.max"
+            [min]="followup.min"
+            [step]="followup.step"
+            [tickInterval]="followup.interval"
+            thumbLabel aria-labelledby="yearsOfFollowUpLabel">
         </mat-slider>
-
+        <p style="text-align:left;">
+          min. {{followup.min}}
+          <span style="float:right;">max. {{followup.max}}</span>
+        </p>
+        <hr>
         <span class="normal-form-spacing">
           <button type="submit" mat-raised-button>Submit</button>
         </span>
