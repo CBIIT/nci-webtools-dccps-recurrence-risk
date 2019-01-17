@@ -68,3 +68,11 @@ html, body {
 .mat-slider-thumb-label-text {
     opacity: 1 !important;
 }
+
+.mat-slider {
+  margin-bottom: -12px;
+}
+
+.mat-icon {
+  transform: scale(.8);
+}

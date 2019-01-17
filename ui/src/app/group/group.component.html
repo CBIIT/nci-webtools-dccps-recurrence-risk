@@ -8,7 +8,7 @@
                   <mat-icon>folder</mat-icon>
                   <mat-label>Browse...</mat-label>
                 </td-file-input>
-                <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
+                <mat-form-field floatLabel="never" tdFileDrop
                                 (fileDrop)="patchValueHelper({seerDataFile: $event})"
                                 (click)="dataFileInput.inputElement.click()"
                                 (keyup.enter)="dataFileInput.inputElement.click()"
@@ -24,7 +24,7 @@
                <mat-icon>folder</mat-icon>
                <mat-label>Browse...</mat-label>
              </td-file-input>
-              <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
+              <mat-form-field floatLabel="never" tdFileDrop
                            (fileDrop)="patchValueHelper({seerDictionaryFile: $event})"
                            (click)="dicFileInput.inputElement.click()"
                            (keyup.enter)="dicFileInput.inputElement.click()"
@@ -40,7 +40,7 @@
                <mat-icon>folder</mat-icon>
                <mat-label>Browse...</mat-label>
              </td-file-input>
-             <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
+             <mat-form-field floatLabel="never" tdFileDrop
                              (fileDrop)="patchValueHelper({canSurvDataFile: $event})"
                              (click)="canSurvFileInput.inputElement.click()"
                              (keyup.enter)="canSurvFileInput.inputElement.click()"
@@ -88,7 +88,8 @@
             </p>
             <hr>
            <span class="normal-form-spacing">
-             <button type="submit" mat-raised-button>Submit</button>
+              <button type="submit" mat-raised-button>Submit</button>
+              <button type="reset" mat-button>Reset</button>
            </span>
            <div class="normal-form-spacing"><mat-divider></mat-divider></div>
            <span><button color="accent" type="button" (click)="onSubmit(true)" mat-raised-button>

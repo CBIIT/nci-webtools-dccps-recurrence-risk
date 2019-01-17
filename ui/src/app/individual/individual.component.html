@@ -8,7 +8,7 @@
             <mat-icon>folder</mat-icon>
             <mat-label>Browse...</mat-label>
           </td-file-input>
-          <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
+          <mat-form-field floatLabel="never" tdFileDrop
                           (fileDrop)="patchValueHelper({seerCSVDataFile: $event})"
                           (click)="dataFileInput.inputElement.click()"
                           (keyup.enter)="dataFileInput.inputElement.click()"
@@ -111,6 +111,7 @@
         <hr>
         <span class="normal-form-spacing">
           <button type="submit" mat-raised-button>Submit</button>
+          <button type="reset" mat-button>Reset</button>
         </span>
         <div class="normal-form-spacing"><mat-divider></mat-divider></div>
         <span><button color="accent" type="button" (click)="onSubmit(true)" mat-raised-button>
