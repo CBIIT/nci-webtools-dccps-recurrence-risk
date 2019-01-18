@@ -39,6 +39,8 @@ export class GroupComponent implements OnInit {
 
   groupDataForm: FormGroup;
 
+  showDownloadResults: boolean;
+
   followup: any = {
     max: 30,
     min: 1,
@@ -218,6 +220,7 @@ export class GroupComponent implements OnInit {
     this.columnsToDisplay = this.displayedColumns;
     const data = JSON.parse(response);
     this.dataSource.data = data;
+    this.showDownloadResults = true;
   }
 
   saveData(response) {

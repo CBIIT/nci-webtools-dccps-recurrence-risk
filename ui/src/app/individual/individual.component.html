@@ -104,19 +104,11 @@
             [tickInterval]="followup.interval"
             thumbLabel aria-labelledby="yearsOfFollowUpLabel">
         </mat-slider>
-        <p style="text-align:left;">
-          min. {{followup.min}}
-          <span style="float:right;">max. {{followup.max}}</span>
-        </p>
-        <hr>
-        <span class="normal-form-spacing">
-          <button class="submit-button" type="submit" mat-raised-button>Submit</button>
-          <button type="reset" mat-flat-button>Reset</button>
-        </span>
+        <p style="text-align:left;"> {{followup.min}} <span style="float:right;">{{followup.max}}</span></p>
         <div class="normal-form-spacing"><mat-divider></mat-divider></div>
         <span>
-          <button color="accent" type="button" (click)="onSubmit(true)" mat-raised-button>
-             <mat-icon>file_download</mat-icon>Download results</button>
+          <button class="submit-button" type="submit" mat-raised-button>Submit</button>
+          <button type="reset" mat-flat-button>Reset</button>
         </span>
       </form>
     </mat-card-content>
@@ -127,10 +119,18 @@
       <mat-tab-group>
         <mat-tab label="Output">
           <mat-error *ngIf="individualDataForm.invalid">{{errorMsg}}</mat-error>
-          <mat-form-field appearance="standard" fxLayout="row" fxLayoutAlign="start stretch">
-            <mat-label>Search Filter</mat-label>
-            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Filter">
-          </mat-form-field>
+          <div fxLayout="row" fxLayout.xs="column" fxLayoutAlign="space-between center">
+              <div>
+                <mat-form-field appearance="standard"  fxLayoutAlign="start stretch">
+                  <mat-label>Search Filter</mat-label>
+                  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Filter">
+                </mat-form-field>
+              </div>
+              <div *ngIf="showDownloadResults">
+                <button color="accent" type="button" (click)="onSubmit(true)" mat-raised-button>
+                  <mat-icon>file_download</mat-icon>Download results</button>
+              </div>
+          </div>
           <div class="table-container">
             <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
               <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
@@ -139,7 +139,6 @@
                   {{ isNumber(element[column]) ?
                   ( unboxNumber(element[column]) | number:'1.0-9' ) : element[column]  }} </td>
               </ng-container>
-
               <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
               <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
             </table>

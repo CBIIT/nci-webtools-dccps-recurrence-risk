@@ -54,6 +54,8 @@ export class IndividualComponent implements OnInit {
 
   loadingDialogRef: any;
 
+  showDownloadResults: boolean = false;
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -160,6 +162,7 @@ export class IndividualComponent implements OnInit {
         if(response) {
           this.closeLoadingDialog();
           downloadFlag ? this.saveData(response) : this.displayData(response);
+          this.showDownloadResults == true;
         } else {
           this.individualDataForm.patchValue({email: ''});
           this.dialog.open(IndividualDialogComponent,
