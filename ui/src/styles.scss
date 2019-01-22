@@ -77,3 +77,22 @@ html, body {
 .mat-icon {
   transform: scale(.8);
 }
+
+.mat-select-content .mat-selected{
+  background-color: #e0e0e0 !important;
+  .mat-option-text{
+    color: mat-color($accent) !important;
+  }
+  .mat-pseudo-checkbox-checked{
+    background-color: mat-color($accent) !important;
+  }
+} 
+
+.mat-option-disabled {
+  .mat-pseudo-checkbox{
+    border-color: #e0e0e0 !important;
+  }
+  .mat-option-text{
+    color: #9e9e9e !important;
+  }
+}

@@ -24,7 +24,7 @@
           <mat-label>Strata</mat-label>
           <mat-select formControlName="strata" multiple>
             <mat-option *ngFor="let strataVar of individualMetadata?.variables" [value]="strataVar"
-                        [disabled]="isSelectionGroupDisabled(individualDataForm.value.strata,strataVar)"
+                        
                         (onSelectionChange)="handleSelectionGroup($event)">
               {{strataVar}}
             </mat-option>
