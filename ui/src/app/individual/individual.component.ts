@@ -162,7 +162,6 @@ export class IndividualComponent implements OnInit {
         if(response) {
           this.closeLoadingDialog();
           downloadFlag ? this.saveData(response) : this.displayData(response);
-          this.showDownloadResults == true;
         } else {
           this.individualDataForm.patchValue({email: ''});
           this.dialog.open(IndividualDialogComponent,
@@ -259,6 +258,7 @@ export class IndividualComponent implements OnInit {
     this.columnsToDisplay = this.displayedColumns;
     const data = JSON.parse(response);
     this.dataSource.data = data;
+    this.showDownloadResults = true;
   }
 
   saveData(response) {
