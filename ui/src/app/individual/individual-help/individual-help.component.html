@@ -7,9 +7,12 @@
   <br>
   <b>Input</b>
     <ul><li> <b>CSV data File</b>: the case-listing unformatted CSV data file exported from SEER*Stat software or user-generated individual data by other statistical software in the CSV format. Note that, 
-                                    users may need to modify the original unformatted case-listing SEER*Stat data before uploading because 1) it may not contain the event variable for death due to cancer; 
-                                    2) there may not be categorical but continuous variables for strata and covariates; 
-                                    3) the stage variable is categorical but with many levels or with numerical unknown stage values, which needs to be recoded as well for creating better categories.
+                                    users may need to modify the original unformatted case-listing SEER*Stat data before uploading because 
+                                    <ol>
+                                        <li>it may not contain the event variable for death due to cancer;</li>
+                                        <li>there may not be categorical but continuous variables for strata and covariates; </li>
+                                        <li>the stage variable is categorical but with many levels or with numerical unknown stage values, which needs to be recoded as well for creating better categories.</li>
+                                    </ol>
     </li><li> <b>Strata</b>: the user-defined strata variables which should be categorical coded as integers.
     </li><li> <b>Covariates</b>: the covariates defined in the mixture cure survival model which should be categorical coded as integers.
     </li><li> <b>Time Variable</b>: the variable specified as follow-up time in the survival model.
@@ -41,6 +44,7 @@
     </li><li> <b>obs_surv</b>: the observed survival from SEER*Stat.
     </li><li> <b>obs_dist_surv</b>: the observed survival for distant stage from SEER*Stat.
     </li></ul>
+    <div><br>Example data: <a target="_self" href="../../assets/example_data/recurrence_risk_individualdata.zip"  download>Individual data sample</a></div>
   <br>
   <p>References</p>
   <h5>1. Yu B, Tiwari RC, Cronin KA, McDonald C, Feuer EJ. CANSURV: A Windows program for population-based cancer survival analysis. Comput.Methods Programs Biomed. 2005;80(3):195-203.</h5>
