@@ -105,9 +105,8 @@ export class IndividualComponent implements OnInit {
       let valuesMap = this.individualMetadata['values'];
       if(valuesMap && valuesMap[timeVar] && valuesMap[timeVar].length > 0 ) {
         this.followup.max = valuesMap[timeVar][valuesMap[timeVar].length-1];
-        this.patchValueHelper({ yearsOfFollowUp: Math.max(this.followup.max,this.individualDataForm.get('yearsOfFollowUp').value) });
+        this.patchValueHelper({ yearsOfFollowUp: this.followup.max });
       }
-
     });
 
     router.events.subscribe( (event) => {
