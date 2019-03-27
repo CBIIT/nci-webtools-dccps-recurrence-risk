@@ -265,4 +265,13 @@ export class GroupComponent implements OnInit {
     }
   }
 
+  resetForm(){
+    this.groupDataForm.reset();
+    this.groupDataForm.patchValue(
+      { stageVariable: '',
+        stageValue: '',
+        adjustmentFactor: '',
+        yearsOfFollowUp: 25
+      }, {emitEvent: false} );
+  }
 }
