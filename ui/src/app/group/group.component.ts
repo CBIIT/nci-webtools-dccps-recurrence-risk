@@ -190,6 +190,7 @@ export class GroupComponent implements OnInit {
       this.fileUploadService.upload(options).subscribe(
         (response) => {
           dialogRef.close();
+          console.log("test")
           let metadata = JSON.parse(response);
           this.groupMetadata = metadata;
           this.followup.max = this.groupMetadata.maxFollowUp[0];
@@ -198,7 +199,7 @@ export class GroupComponent implements OnInit {
             { stageVariable: '',
               stageValue: '',
               adjustmentFactor: '1',
-              yearsOfFollowUp: Math.min(this.followup.max,this.groupDataForm.get('yearsOfFollowUp').value)
+              yearsOfFollowUp: Math.min(this.followup.max, 25)
             }, {emitEvent: false} );
           this.groupDataForm.markAsUntouched();
         },
@@ -263,15 +264,5 @@ export class GroupComponent implements OnInit {
     } else {
       return value;
     }
-  }
-
-  resetForm(){
-    this.groupDataForm.reset();
-    this.groupDataForm.patchValue(
-      { stageVariable: '',
-        stageValue: '',
-        adjustmentFactor: '',
-        yearsOfFollowUp: 25
-      }, {emitEvent: false} );
   }
 }
