@@ -173,6 +173,7 @@ export class GroupComponent implements OnInit {
   loadSeerFormData() {
     //upload files and get back metadata to fill in form inputs
     let dicFile = this.groupDataForm.get('seerDictionaryFile').value;
+    console.log(dicFile);
     let dataFile = this.groupDataForm.get('seerDataFile').value;
     let formData: FormData = new FormData();
 
