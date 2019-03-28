@@ -187,10 +187,10 @@ export class GroupComponent implements OnInit {
        };
 
       let dialogRef = this.dialog.open(LoadingDialogComponent);
+    
       this.fileUploadService.upload(options).subscribe(
         (response) => {
           dialogRef.close();
-          console.log("test")
           let metadata = JSON.parse(response);
           this.groupMetadata = metadata;
           this.followup.max = this.groupMetadata.maxFollowUp[0];
