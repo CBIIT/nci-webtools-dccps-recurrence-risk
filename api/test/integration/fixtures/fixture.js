@@ -10,9 +10,8 @@ const rSyncFile = path.join('test','integration','fixtures','ex-sync.R');
 const rAttitudeFile = path.join('test','integration','fixtures','attitude.json');
 
 const groupMetadataFixture = {
-  variables: [ 'Page_type', 'SEER_historic_stage_LRD', 'Year_of_diagnosis_BC','Age_breast' ],
+  variables: ['SEER_historic_stage_LRD', 'Year_of_diagnosis_BC','Age_breast' ],
   values: {
-    Page_type: [ 0 ],
     SEER_historic_stage_LRD: [ 0, 1, 2],
     Year_of_diagnosis_BC: [ 0, 1, 2, 3 ],
     Age_breast: [ 0, 1, 2 ]

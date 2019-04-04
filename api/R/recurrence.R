@@ -23,18 +23,12 @@ handleGroupMetadata <- function(requestId,seerDictionaryFile,seerDataFile) {
   stopifnot(exists("seerDictionaryFile"),exists("seerDataFile"),
   file.exists(seerDictionaryFile),file.exists(seerDataFile))
   seerData = read.SeerStat(seerDictionaryFile,seerDataFile)
-  seerVars = choices.vars(seerData)
-
-  intervalIndex = match('interval',tolower(seerVars))
-  stopifnot(intervalIndex > 0)
-
-  stageData = seerData[,seerVars[1:intervalIndex-1]]
-  stageVars = seerVars[1:intervalIndex-1]
+  seerVars = choices.stagevars(seerData)
 
   metadata = c()
-  metadata$variables = stageVars
-  metadata$values = lapply(stageData,function(x) sort(unique(x)))
-  metadata$maxFollowUp = max(seerData[intervalIndex])
+  metadata$variables = seerVars
+  metadata$values = lapply(seerData[,seerVars],function(x) sort(unique(x)))
+  metadata$maxFollowUp = maxfup.group(seerData)
   return(metadata)
 }
 

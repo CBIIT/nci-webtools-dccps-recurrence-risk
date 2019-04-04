@@ -44,6 +44,20 @@ choices.vars<- function(data){
   return(cnames)
 }
 
+choices.stagevars<- function(data){
+  data<-data.frame(data)
+  cnames <- colnames(data)
+  int.pos <- which(cnames=="Interval")
+  if("Page_type" %in% cnames){
+    pt.pos<-which(cnames=="Page_type")
+    cnames.sub<-cnames[(pt.pos+1):(int.pos-1)]
+  }
+  if(!"Page_type" %in% cnames){
+    cnames.sub<-cnames[1:(int.pos-1)]
+  }
+  return(cnames.sub)
+}
+
 choices.stagevalues <- function(data,stagevar){
   data<-data.frame(data)
   if (stagevar == "") return()
