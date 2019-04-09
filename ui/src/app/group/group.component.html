@@ -3,22 +3,7 @@
        <mat-card-header></mat-card-header>
        <mat-card-content>
          <form [formGroup]="groupDataForm" (ngSubmit)="onSubmit()" fxLayout="column">
-             <div fxLayout="row" fxLayout.lt-md="column" >
-              <td-file-input class="browse-button" #dicFileInput formControlName="seerDictionaryFile" accept=".dic" required>
-                <mat-icon>folder</mat-icon>
-                <mat-label>Browse...</mat-label>
-              </td-file-input>
-                <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
-                            (fileDrop)="patchValueHelper({seerDictionaryFile: $event})"
-                            (click)="dicFileInput.inputElement.click()"
-                            (keyup.enter)="dicFileInput.inputElement.click()"
-                            (keyup.delete)="dicFileInput.clear()"
-                            (keyup.backspace)="dicFileInput.clear()" flex>
-                <mat-label>SEER*Stat Dic File</mat-label>
-                <input matInput placeholder="Select file" [value]="groupDataForm?.value?.seerDictionaryFile?.name ? groupDataForm?.value?.seerDictionaryFile?.name : '' " required readonly/>
-                </mat-form-field>
-           </div>
-           
+
           <div fxLayout="row" fxLayout.lt-md="column">
                 <td-file-input class="browse-button" #dataFileInput formControlName="seerDataFile" accept=".txt" required>
                   <mat-icon>folder</mat-icon>
@@ -34,6 +19,22 @@
                   <input matInput placeholder="Select file" [value]="groupDataForm?.value?.seerDataFile?.name ? groupDataForm?.value?.seerDataFile?.name : '' "  required readonly/>
                 </mat-form-field>
             </div>
+
+            <div fxLayout="row" fxLayout.lt-md="column" >
+                <td-file-input class="browse-button" #dicFileInput formControlName="seerDictionaryFile" accept=".dic" required>
+                  <mat-icon>folder</mat-icon>
+                  <mat-label>Browse...</mat-label>
+                </td-file-input>
+                  <mat-form-field appearance="outline" floatLabel="never" tdFileDrop
+                              (fileDrop)="patchValueHelper({seerDictionaryFile: $event})"
+                              (click)="dicFileInput.inputElement.click()"
+                              (keyup.enter)="dicFileInput.inputElement.click()"
+                              (keyup.delete)="dicFileInput.clear()"
+                              (keyup.backspace)="dicFileInput.clear()" flex>
+                  <mat-label>SEER*Stat Dic File</mat-label>
+                  <input matInput placeholder="Select file" [value]="groupDataForm?.value?.seerDictionaryFile?.name ? groupDataForm?.value?.seerDictionaryFile?.name : '' " required readonly/>
+                  </mat-form-field>
+             </div>
 
            <div fxLayout="row" fxLayout.lt-md="column">
              <td-file-input class="browse-button" #canSurvFileInput formControlName="canSurvDataFile" accept=".csv" required>
