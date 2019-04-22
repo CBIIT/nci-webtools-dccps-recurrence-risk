@@ -36,4 +36,6 @@ app.use(function (err, req, res, next) {
     msg:'An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.'} ]});
 });
 
+app.listen(process.env.PORT || 3000);
+
 module.exports = app;
