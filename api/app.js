@@ -32,11 +32,11 @@ app.get('/ping', (req, res) => {
   res.send('true');
 });
 
-mkdirp('./logs/', function (err) {
+mkdirp('../../logs/', function (err) {
   if (err) console.error(err)
   else console.log('log folder created')
 });
-mkdirp('./data/staging/', function (err) {
+mkdirp('../../data/staging/', function (err) {
   if (err) console.error(err)
   else console.log('data folder created')
 });

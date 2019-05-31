@@ -38,9 +38,3 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-
-#logs 
-/api/logs
-
-#logs 
-/api/data
