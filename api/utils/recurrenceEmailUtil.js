@@ -2,33 +2,54 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const handlebars = require('express-handlebars');
 const nodemailerExpressHandlebars = require('nodemailer-express-handlebars');
-const viewEngine = handlebars.create({});
+const hbs = require('handlebars');
+const fs = require('fs');
 var logger = require('./loggerUtil').logger;
+
+const readFile = path => fs.readFileSync(path, 'utf-8').toString();
+const emailTemplate = readFile(__dirname + '/recurrenceEmail.handlebars');
+
+// const viewEngine = handlebars.create({ partialsDir: __dirname });
 
 let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'mailfwd.nih.gov',
     port: process.env.SMTP_PORT || 25,
-    secure: false
+    secure: false,
+    "tls":{
+      // do not fail on invalid certs
+      "rejectUnauthorized": false
+  }
 });
 
+/*
 transporter.use('compile',
   nodemailerExpressHandlebars({
   viewEngine: viewEngine,
   viewPath: path.resolve(__dirname)
-}));
+}))
+*/
 
 module.exports.sendMail = (error,data) => {
+  const message = hbs.compile(emailTemplate)({
+    ...data,
+    hasError: (error) ? true : false,
+    errorMsg: (error) ? error.message : '',
+    data: data.originalInput
+  });
+  logger.log('info', 'TEST', data)
 
   let mailOptions = {
     from: '"Recurrence Risk Tool " <do.not.reply@nih.gov>', // sender address
     to: data.receivers,
     subject: 'Recurrence Risk Tool Results', // Subject line
-    template: 'recurrenceEmail',
+    html: message,
+/*    template: 'recurrenceEmail',
     context: {
       hasError: (error) ? true : false,
       errorMsg: (error) ? error.message : '',
       data: data.originalInput
     }
+    */
   };
 
   if(!error) {
