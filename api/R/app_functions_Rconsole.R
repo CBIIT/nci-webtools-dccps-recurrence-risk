@@ -86,6 +86,10 @@ maxfup.individual<-function(data,timevar)({
 
 recurrencerisk.group<-function(data,data.cansurv,stagevar,stage.dist.value,adj.r,fup.value){
   seerdata<-data
+  header<-colnames(seerdata)
+  header.clean = gsub("[,()<>={}!@#$%^&*+-]", "", header);
+  header.seer = gsub(" ", "_", header.clean);
+  colnames(seerdata)<-header.seer
   csdata <- data.cansurv
   cnames.seer <- colnames(seerdata)
   cnames.cs <- colnames(csdata)
@@ -96,7 +100,7 @@ recurrencerisk.group<-function(data,data.cansurv,stagevar,stage.dist.value,adj.r
   }
   if(is.numeric(RR)== F){
     warning.str<-"Warning: Adjustment Factor r should be numeric."
-    print(warning.str)    
+    stop(warning.str)    
   }
   
   stage.dist.name <- stagevar
@@ -110,6 +114,12 @@ recurrencerisk.group<-function(data,data.cansurv,stagevar,stage.dist.value,adj.r
     surv.name <- cnames.seer[which(grepl("Survival", cnames.seer)==T & grepl("Cum", cnames.seer)==T & grepl("Relative", cnames.seer))]
     survse.name <- cnames.seer[which(grepl("SE", cnames.seer)==T & grepl("Cum", cnames.seer)==T & grepl("Relative", cnames.seer))]
   }
+  ## convert to proportions if the survival rates are percentages
+  if(length(which(seerdata[,surv.name]>1))>0){
+    seerdata[,surv.name]<-seerdata[,surv.name]*0.01
+    seerdata[,survse.name]<-seerdata[,survse.name]*0.01
+  }
+  
   int.max.seer <- max(seerdata$Interval,na.rm=T)
   allvar.seer<-cnames.seer[(which(cnames.seer!="Page_type")[1]):(which(cnames.seer=="Interval")-1)]
   cols.keep.seer<-c(allvar.seer,"Interval",surv.name)
@@ -713,7 +723,7 @@ recurrencerisk.individual<-function(data,stratum,covar,timevar,eventvar,stagevar
   }
   if(is.numeric(RR)== F){
     warning.str<-"Warning: Adjustment Factor r should be numeric."
-    print(warning.str)    
+    stop(warning.str)    
   }
   stage.dist.name <- stagevar
   nstratum<-length(stratum)
