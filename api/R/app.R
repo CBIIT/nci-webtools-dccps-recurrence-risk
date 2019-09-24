@@ -106,7 +106,7 @@ ui <- fluidPage(
                           selectInput("dist.tab2", "Distribution:",choices = c("Log-logistic","Weibull")),
                           selectInput("stage.var.tab2", "Stage Variable:", choices = ""),
                           selectInput("stage.dist.value.tab2", "Distant Stage Value:",choices = ""),
-                          numericInput("r.tab2", "Adjustment Factor r:", value=1, min = 1, max = 2, step = 0.05),
+                          numericInput("r.tab2", "Adjustment Factor r:", value=1, min = 0, max = 10, step = 0.05),
                           sliderInput("fup.value.tab2","Years of Follow-up:",min = 1,max = 30,value = 25),
                           actionButton("action.tab2", "Submit"),
                           tags$hr(),
@@ -263,9 +263,9 @@ server <- function(input, output,session) {
     cnames.seer <- colnames(seerdata())
     cnames.cs <- colnames(csdata)
     
-    validate(
-      need(max(nchar(cnames.seer))<=32, "Warning: SEER*Stat data contains a variable with name exceeding 32 characters which may cause problems in CanSurv output.")
-    ) 
+    #validate(
+    #  need(max(nchar(cnames.seer))<=32, "Warning: SEER*Stat data contains a variable with name exceeding 32 characters which may cause problems in CanSurv output.")
+    #) 
     validate(
       need(is.numeric(input$r)== T, "Warning: Adjustment Factor r should be numeric.")
     )
