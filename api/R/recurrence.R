@@ -24,10 +24,11 @@ handleGroupMetadata <- function(requestId,seerDictionaryFile,seerDataFile) {
   file.exists(seerDictionaryFile),file.exists(seerDataFile))
   seerData = read.SeerStat(seerDictionaryFile,seerDataFile)
   seerVars = choices.stagevars(seerData)
+  seerValues = if (length(seerVars) == 1) seerData[seerVars] else seerData[,seerVars]
 
   metadata = c()
   metadata$variables = seerVars
-  metadata$values = lapply(seerData[,seerVars],function(x) sort(unique(x)))
+  metadata$values = lapply(seerValues,function(x) sort(unique(x)))
   metadata$maxFollowUp = maxfup.group(seerData)
   return(metadata)
 }
