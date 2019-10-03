@@ -25,7 +25,7 @@ ui <- fluidPage(
                           
                           selectInput("stage.var", "Stage Variable:", choices = ""),
                           selectInput("stage.dist.value", "Distant Stage Value:",choices = ""),
-                          numericInput("r", "Adjustment Factor r:", value=1, min = 1, max = 2, step = 0.05),
+                          numericInput("r", "Adjustment Factor r:", value=1, min = 0.5, max = 2, step = 0.05),
 
                           sliderInput("fup.value","Years of Follow-up:",min = 1,max = 30,value = 25),
                           actionButton("action", "Submit"),
