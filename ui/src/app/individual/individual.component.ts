@@ -1,6 +1,6 @@
 import { Inject, Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatPaginator,
   MatTableDataSource,
   MatSort ,
@@ -77,16 +77,16 @@ export class IndividualComponent implements OnInit {
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
     private riskService: RecurrenceRiskService,private router: Router,private dialog: MatDialog) {
     this.individualDataForm = formBuilder.group({
-      seerCSVDataFile: [''],
+      seerCSVDataFile: ['', Validators.required],
       strata: [''],
       covariates: [''],
-      timeVariable: [''],
-      eventVariable: [''],
-      distribution: [''],
-      stageVariable: [''],
-      distantStageValue: [''],
-      adjustmentFactor: ['1'],
-      yearsOfFollowUp: ['2'],
+      timeVariable: ['', Validators.required],
+      eventVariable: ['', Validators.required],
+      distribution: ['', Validators.required],
+      stageVariable: ['', Validators.required],
+      distantStageValue: ['', Validators.required],
+      adjustmentFactor: ['1', [Validators.required, Validators.min(0)]],
+      yearsOfFollowUp: ['2', [Validators.required, Validators.min(1)]],
       email: ['']
     });
 

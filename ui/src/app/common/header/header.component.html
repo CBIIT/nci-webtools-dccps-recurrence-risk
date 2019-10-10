@@ -1,24 +1,36 @@
 <header>
-  <div fxLayout="row" fxLayoutAlign="end stretch">
-    <a class="sr-only" href="#main">Skip to main content</a>
+  <div class="container">
+    <div>
+      <a class="sr-only" href="#main">Skip to main content</a>
+    </div>
+    <a href="https://cancercontrol.cancer.gov/" target="_blank">
+      <img
+        class="mw-100 my-3"
+        src="assets/nci-dccps-logo.svg"
+        alt="Division of Cancer Control Logo"
+        height="60"
+      />
+    </a>
   </div>
-  <mat-toolbar color="primary" class="mat-elevation-z10">
-    <mat-toolbar-row>
-      <div class="nih-logo">
-        <a href="http://cancer.gov" target="_blank" class="removeOutline">
-          <img id="logo" src="assets/nci-logo-full.svg" alt="go to cancer.gov">
-        </a>
-      </div>
-    </mat-toolbar-row>
-    <mat-toolbar-row fxLayout="column" fxLayoutAlign="start stretch" class="tool-name">
-      <h1>Recurrence Risk Tool</h1>
-    </mat-toolbar-row>
-    <mat-toolbar-row fxLayoutAlign="start" fxLayout="column" fxLayout.xs="column" fxFlexFill>
-      <mat-divider></mat-divider>
-      <mat-button-toggle-group fxLayout="row" fxLayout.xs="column" name="Navigation" aria-label="Navigation">
-        <mat-button-toggle value="group" routerLink="/group" routerLinkActive="mat-button-toggle-checked">Group Data</mat-button-toggle>
-        <mat-button-toggle value="individual" routerLink="/individual" routerLinkActive="mat-button-toggle-checked">Individual Data</mat-button-toggle>
-      </mat-button-toggle-group>
-    </mat-toolbar-row>
-  </mat-toolbar>
+
+  <div class="bg-primary">
+    <div class="container">
+      <h1 class="tool-name">RecurRisk</h1>
+    </div>
+  </div>
+
+  <div class="shadow-sm">
+    <div class="container navbar-links">
+      <a
+        routerLink="/group"
+        routerLinkActive="active">
+        Group Data
+      </a>
+      <a
+        routerLink="/individual"
+        routerLinkActive="active">
+        Individual Data
+      </a>
+    </div>
+  </div>
 </header>

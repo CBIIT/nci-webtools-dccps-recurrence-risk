@@ -1,4 +1,5 @@
-@import 'styles-variables';
+@import './styles/styles-variables';
+@import './styles/utils.scss';
 
 html, body {
   box-sizing: border-box;
@@ -8,14 +9,15 @@ html, body {
 
 .page-container {
   @extend %page-full;
-  max-width: 1440px;
+  // max-width: 1440px;
   margin: 0 auto !important;
   float: none !important;
 }
 
 .app-container {
   @extend %page-full;
-  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
 }
 
 .rtt-app-theme {
@@ -31,7 +33,7 @@ html, body {
 }
 
 .rtt-app-theme .mat-card {
-  margin: 20px;
+  // margin: 20px;
 }
 
 .form-label {
@@ -86,7 +88,7 @@ html, body {
   .mat-pseudo-checkbox-checked{
     background-color: mat-color($accent) !important;
   }
-} 
+}
 
 .mat-option-disabled {
   .mat-pseudo-checkbox{
@@ -101,10 +103,48 @@ html, body {
   color: #424242 !important;
 }
 
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+  margin: 0.25em 0 0.75em;
+}
+
+.mat-form-field-subscript-wrapper {
+  margin-top: 0.35em;
+}
+
+.mat-select-panel .mat-optgroup-label, .mat-select-panel .mat-option {
+  background-color: white;
+}
+
 .download_text {
   margin-top: -15px !important;
   margin-bottom: 15px !important;
   margin-left: 110px !important;
   font-size: 80% !important;
   z-index:1;
+}
+
+.tool-name{
+  margin: 0;
+  font-weight: 500;
+  font-size: 1.2rem;
+  padding: 0.1rem;
+}
+
+.navbar-links {
+  a {
+    color: black;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.7rem;
+    text-decoration: none;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s;
+  }
+
+  a.active {
+    border-bottom-color: steelblue;
+    color: #333c4e;
+  }
 }

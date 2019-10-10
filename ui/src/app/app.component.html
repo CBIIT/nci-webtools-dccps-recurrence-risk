@@ -1,9 +1,9 @@
 <section class="page-container mat-typography">
-  <div class="app-container" fxLayout="column" fxLayoutAlign="start stretch">
-    <rrt-header></rrt-header>
-    <main id="main"  fxFlex="1 0 auto">
+  <div class="app-container">
+    <rrt-header style="flex: 0 0 auto;"></rrt-header>
+    <main id="main" class="container" style="flex: 1 0 auto;">
       <router-outlet></router-outlet>
     </main>
-    <rrt-footer></rrt-footer>
+    <rrt-footer style="flex: 0 0 auto;"></rrt-footer>
   </div>
 </section>

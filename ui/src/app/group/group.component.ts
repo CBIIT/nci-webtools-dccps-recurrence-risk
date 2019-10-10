@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatPaginator, MatTableDataSource, MatSort, MatDialog} from '@angular/material';
 import { TdFileService, TdFileInputComponent, IUploadOptions } from '@covalent/core/file';
 import { environment } from '../../environments/environment';
@@ -68,13 +68,13 @@ export class GroupComponent implements OnInit {
   constructor(private fileUploadService: TdFileService,private formBuilder: FormBuilder,
     private riskService: RecurrenceRiskService,private router: Router,private dialog: MatDialog) {
     this.groupDataForm = formBuilder.group({
-      seerDictionaryFile: new FormControl(''),
-      seerDataFile: new FormControl(''),
-      canSurvDataFile: new FormControl(''),
-      stageVariable: new FormControl(''),
-      stageValue: new FormControl(''),
-      adjustmentFactor: new FormControl(''),
-      yearsOfFollowUp: new FormControl('25')
+      seerDictionaryFile: new FormControl('', [Validators.required]),
+      seerDataFile: new FormControl('', [Validators.required]),
+      canSurvDataFile: new FormControl('', [Validators.required]),
+      stageVariable: new FormControl('', [Validators.required]),
+      stageValue: new FormControl('', [Validators.required]),
+      adjustmentFactor: new FormControl('', [Validators.required, Validators.min(0)]),
+      yearsOfFollowUp: new FormControl('25', [Validators.required, Validators.min(1)])
     });
 
     this.groupDataForm.get('seerDictionaryFile').valueChanges.subscribe( file => {
@@ -89,6 +89,8 @@ export class GroupComponent implements OnInit {
       this.groupDataForm.patchValue({stageValue: ''}, {emitEvent: false});
       this.errorMsg = '';
     });
+
+    this.groupDataForm.get('adjustmentFactor').value
 
 	  router.events.subscribe( (event) => {
       if (event instanceof NavigationStart) {
@@ -162,7 +164,7 @@ export class GroupComponent implements OnInit {
     this.groupDataForm.updateValueAndValidity();
     //submit everything
     if(this.groupDataForm.invalid) {
-      this.errorMsg = "All form fields are required."
+      this.errorMsg = "Please correct the errors in the form."
       return false;
     } else {
       this.handleSubmitData(downloadFlag);
@@ -186,7 +188,7 @@ export class GroupComponent implements OnInit {
        };
 
       let dialogRef = this.dialog.open(LoadingDialogComponent);
-    
+
       this.fileUploadService.upload(options).subscribe(
         (response) => {
           dialogRef.close();
