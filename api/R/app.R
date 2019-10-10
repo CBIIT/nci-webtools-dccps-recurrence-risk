@@ -269,6 +269,9 @@ server <- function(input, output,session) {
     validate(
       need(is.numeric(input$r)== T, "Warning: Adjustment Factor r should be numeric.")
     )
+    validate(
+      need((input$r>0)== T, "Warning: Adjustment Factor r should be positive.")
+    )
     
     RR <- as.numeric(input$r)
     interval.max <- as.numeric(input$fup.value)
