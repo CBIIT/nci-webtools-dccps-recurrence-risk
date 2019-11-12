@@ -1349,12 +1349,12 @@ html {
   height: 100%;
 }
 
-ul {
-  text-align: center;
+.text-center {
+  text-align: center !important;
 }
 
-.text-center {
-text-align: center;
+.text-left {
+  text-align: left !important;
 }
 
 .list-inline {
