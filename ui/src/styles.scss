@@ -80,6 +80,14 @@ html, body {
   transform: scale(.8);
 }
 
+.mat-progress-spinner.mat-progress-spinner-indeterminate-animation[mode=indeterminate] circle {
+	stroke: steelblue;
+}
+
+.mat-dialog-container {
+	background-color: white;
+}
+
 .mat-select-content .mat-selected{
   background-color: #e0e0e0 !important;
   .mat-option-text{
@@ -146,5 +154,11 @@ html, body {
   a.active {
     border-bottom-color: steelblue;
     color: #333c4e;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1440px !important;
   }
 }
