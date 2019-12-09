@@ -123,12 +123,25 @@ html, body {
   background-color: white;
 }
 
-.download_text {
-  margin-top: -15px !important;
-  margin-bottom: 15px !important;
-  margin-left: 110px !important;
-  font-size: 80% !important;
+.download-text {
+  margin-top: -15px;
+  margin-bottom: 15px;
+  margin-left: 110px;
+  font-size: 80%;
+  font-weight: 500;
+  color: steelblue;
   z-index:1;
+  // display: inline-block;
+}
+
+.download-text > a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1280px) {
+  .download-text {
+    margin-left: 10px;
+  }
 }
 
 .tool-name{
