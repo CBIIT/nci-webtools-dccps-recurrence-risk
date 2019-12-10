@@ -50,15 +50,15 @@ export class GroupComponent implements OnInit {
 
   groupMetadata: any = {};
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
 
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort, {static: true}) sort: MatSort;
 
-  @ViewChild('dicFileInput') dicFileSelect: TdFileInputComponent;
+  @ViewChild('dicFileInput', {static: true}) dicFileSelect: TdFileInputComponent;
 
-  @ViewChild('dataFileInput') dataFileSelect: TdFileInputComponent;
+  @ViewChild('dataFileInput', {static: true}) dataFileSelect: TdFileInputComponent;
 
-  @ViewChild('canSurvFileInput') csvFileSelect: TdFileInputComponent;
+  @ViewChild('canSurvFileInput', {static: true}) csvFileSelect: TdFileInputComponent;
 
   errorMsg: string = "";
 

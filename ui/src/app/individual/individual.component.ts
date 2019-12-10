@@ -56,11 +56,11 @@ export class IndividualComponent implements OnInit {
 
   showDownloadResults: boolean = false;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
 
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort, {static: true}) sort: MatSort;
 
-  @ViewChild('dataFileInput') dataFileSelect: TdFileInputComponent;
+  @ViewChild('dataFileInput', {static: true}) dataFileSelect: TdFileInputComponent;
 
   errorMsg: string = "";
 
