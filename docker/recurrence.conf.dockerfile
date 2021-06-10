@@ -1,0 +1,3 @@
+# Stage 1 - Copy static assets
+ProxyPass "/recurrence/api" "${API_HOST}/api/"
+ProxyPassReverse "/recurrence/api" "${API_HOST}/api/"
