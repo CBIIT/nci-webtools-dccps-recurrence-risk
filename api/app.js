@@ -33,17 +33,17 @@ app.use( (req,res,next) => {
 
 app.get('/', (req,res) => res.sendFile('index.html',{ root: __dirname + "/public" } ));
 // app.use('/recurrence', recurrenceRouter); // use locally
-app.use(recurrenceRouter);
+app.use('/api/recurrence', recurrenceRouter);
 
-app.get('/ping', (req, res) => {
+app.get('/api/ping', (req, res) => {
   res.send('true');
 });
 
-mkdirp('../../logs/', function (err) {
+mkdirp('./logs/', function (err) {
   if (err) console.error(err)
   else console.log('log folder created')
 });
-mkdirp('../../data/staging/', function (err) {
+mkdirp('./data/staging/', function (err) {
   if (err) console.error(err)
   else console.log('data folder created')
 });
