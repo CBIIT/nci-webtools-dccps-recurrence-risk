@@ -28,7 +28,7 @@ RUN npm install
 COPY ui /ui/
 
 RUN npm run-script build \
- && mv dist /var/www/html/recurrence
+ && mv dist /var/www/html/recurrence \
  && chown -R apache:apache /var/www/html
 
 WORKDIR /var/www/html/recurrence
