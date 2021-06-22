@@ -27,9 +27,11 @@ RUN npm install
 
 COPY ui /ui/
 
-RUN npm run-script build
+RUN npm run-script build \
+ && mv dist /var/www/html/recurrence
+ && chown -R apache:apache /var/www/html
 
-RUN cp -r dist/* /var/www/html
+WORKDIR /var/www/html/recurrence
 
 EXPOSE 80
 EXPOSE 443
