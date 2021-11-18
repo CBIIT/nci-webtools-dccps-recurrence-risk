@@ -1,9 +1,41 @@
 {
-  "name": "recurrence-risk-tool-parent",
+  "name": "recurrence-risk",
   "version": "1.0.0",
-  "description": "parent folder to the recurrence risk tool",
-  "devDependencies": {
-    "husky": "^1.1.1"
+  "description": "recurrence risk tool",
+  "main": "server/app.js",
+  "scripts": {
+    "test": "mocha",
+    "format": "prettier --write  --ignore-unknown .",
+    "prepare": "husky install"
   },
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CBIIT/nci-webtools-dccps-recurrence-risk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CBIIT/nci-webtools-dccps-recurrence-risk/issues"
+  },
+  "homepage": "https://github.com/CBIIT/nci-webtools-dccps-recurrence-risk#readme",
+  "devDependencies": {
+    "husky": "^7.0.4",
+    "lint-staged": "^12.0.2",
+    "prettier": "^2.4.1"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "quoteProps": "consistent",
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "htmlWhitespaceSensitivity": "ignore",
+    "singleQuote": false
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
 }

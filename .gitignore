@@ -38,7 +38,11 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+.Rproj.user
+node_modules
+server/logs
+server/config.json
+server/data
 
-# api
-api/logs/
-api/data
+*.Rproj
+.vscode/*
