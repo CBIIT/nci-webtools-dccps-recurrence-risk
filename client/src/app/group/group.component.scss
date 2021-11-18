@@ -1,0 +1,20 @@
+
+.table-container {
+  overflow-x: auto;
+}
+
+.mat-table {
+  display: inline-table;
+  width: 99%;
+  th, td {
+    padding: 10px;
+  }
+}
+
+.normal-form-spacing {
+    padding-bottom: 1.5vh;
+}
+
+.mat-raised-button {
+  margin-right: 10px;
+}
