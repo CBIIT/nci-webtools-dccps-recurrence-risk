@@ -1,34 +1,30 @@
 {
-  "name": "recurrence-risk-tool-api",
+  "name": "recurrence-risk-server",
   "version": "1.0.0",
-  "private": true,
+  "description": "",
+  "main": "app.js",
   "scripts": {
-    "start": "export PORT=8030 && node app.js",
-    "test": "nyc --cache --check-coverage --lines 80 --functions 80 --branches 80 --reporter=html mocha --recursive --timeout 30000 --exit"
+    "start": "node app.js --production",
+    "start:dev": "node app.js",
+    "start:queue": "node queue-worker.js",
+    "install:r": "Rscript install.R",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.0",
-    "express-handlebars": "^3.0.0",
-    "express-router-ping": "^1.0.0",
-    "express-validator": "^5.3.0",
-    "helmet": "^3.21.2",
-    "morgan": "~1.9.0",
-    "multer": "^1.3.1",
-    "nodemailer": "^4.6.8",
-    "nodemailer-express-handlebars": "^3.0.0",
-    "underscore": "^1.8.3",
-    "uuid": "^3.3.2",
-    "winston": "^3.1.0",
-    "worker-farm": "^1.6.0"
+    "aws-sdk": "^2.1031.0",
+    "compression": "^1.7.4",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "lodash": "^4.17.21",
+    "multer": "^1.4.3",
+    "nodemailer": "^6.7.1",
+    "r-wrapper": "^1.1.2",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-http": "^4.2.0",
-    "mocha": "^5.2.0",
-    "nyc": "^14.1.1",
-    "rewire": "^4.0.1",
-    "sinon": "^7.0.0"
+    "mocha": "^9.1.3"
   }
 }
