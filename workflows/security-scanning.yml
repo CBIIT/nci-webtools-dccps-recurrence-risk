@@ -1,0 +1,89 @@
+name: Scan repository
+on:
+  push:
+
+jobs:
+  CodeQL:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Initialize the CodeQL tools for scanning
+        uses: github/codeql-action/init@v1.0.20
+        with:
+          languages: "javascript"
+          queries: security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+
+  ScanBackendImage:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+      IMAGE_NAME: backend-${{ github.sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ env.IMAGE_NAME }} \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -f docker/backend.dockerfile \
+            ${{ github.workspace }}
+
+      - name: Scan image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.IMAGE_NAME }}"
+          format: "template"
+          template: "@/contrib/sarif.tpl"
+          exit-code: "0"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+          timeout: "30m"
+          output: "trivy-results-backend.sarif"
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results-backend.sarif"
+
+  ScanFrontendImage:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+      IMAGE_NAME: frontend-${{ github.sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ env.IMAGE_NAME }} \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -f docker/frontend.dockerfile \
+            ${{ github.workspace }}
+
+      - name: Scan image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.IMAGE_NAME }}"
+          format: "template"
+          template: "@/contrib/sarif.tpl"
+          exit-code: "0"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+          timeout: "30m"
+          output: "trivy-results-frontend.sarif"
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: "trivy-results-frontend.sarif"
