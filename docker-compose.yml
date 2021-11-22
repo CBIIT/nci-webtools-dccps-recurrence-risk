@@ -1,0 +1,37 @@
+version: "3"
+services:
+  recurrence-risk-backend:
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+      args:
+        BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+    volumes:
+      - ./server/config.json:/app/server/config.json:ro
+      - ./server/logs:/app/logs
+
+  recurrence-risk-processor:
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+      args:
+        BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+    volumes:
+      - ./server/config.json:/app/server/config.json:ro
+      - ./server/logs:/app/logs
+    entrypoint: npm run start:queue
+
+  recurrence-risk-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.dockerfile
+      args:
+        FRONTEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+    environment:
+      APP_PATH: /recurrence
+      API_HOST: http://recurrence-risk-backend
+      API_PORT: 8000
+    links:
+      - recurrence-risk-backend:recurrence-risk-backend
+    ports:
+      - "8080:80"
