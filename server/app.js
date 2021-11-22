@@ -1,64 +1,41 @@
-var express = require('express');
-var helmet = require('helmet');
-var cors = require('cors');
-var mkdirp = require('mkdirp');
+const fs = require("fs");
+const AWS = require("aws-sdk");
+const express = require("express");
+const helmet = require("helmet");
+const getLogger = require("./services/logger");
+const apiRouter = require("./services/api");
+const config = require("./config.json");
+const isProduction = process.env.NODE_ENV === "production";
 
+AWS.config.update(config.aws);
 
-var logger = require('./utils/loggerUtil').logger;
-var indexRouter = require('./routes/index');
-var recurrenceRouter = require('./routes/recurrence');
+const app = express();
 
-const uuid = require('uuid/v1');
+// initialize logger
+app.locals.logger = getLogger("recurrence-risk");
 
+// add security headers to all responses
+app.use(
+  helmet({
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  }),
+);
 
-var app = express();
+app.use("/api", apiRouter);
 
-app.use(helmet({
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  }
-}));
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// global error handler
+app.use((error, request, response, next) => {
+  const { name, message } = error;
+  request.app.locals.logger.error(error);
 
-app.use(express.static('public'))
-
-app.use( (req,res,next) => {
-  req.requestId = uuid();
-  next();
+  // return less descriptive errors in production
+  response.status(500).json(isProduction ? name : `${name}: ${message}`);
 });
 
-app.get('/', (req,res) => res.sendFile('index.html',{ root: __dirname + "/public" } ));
-// app.use('/recurrence', recurrenceRouter); // use locally
-app.use('/api/recurrence', recurrenceRouter);
-
-app.get('/api/ping', (req, res) => {
-  res.send('true');
+app.listen(config.server.port, () => {
+  app.locals.logger.info(`Application is running on port: ${config.server.port}`);
 });
-
-mkdirp('./logs/', function (err) {
-  if (err) console.error(err)
-  else console.log('log folder created')
-});
-mkdirp('./data/staging/', function (err) {
-  if (err) console.error(err)
-  else console.log('data folder created')
-});
-mkdirp('./public/', function (err) {
-  if (err) console.error(err)
-  else console.log('public folder created')
-});
-
-
-app.use(function (err, req, res, next) {
-  logger.log('error',err);
-  res.status(500).send({errors: [ {
-    msg:'An unexpected error occured. Please ensure the input file(s) is in the correct format and/or correct parameters were chosen.'} ]});
-});
-
-app.listen(process.env.PORT || 4000);
-
-module.exports = app;
