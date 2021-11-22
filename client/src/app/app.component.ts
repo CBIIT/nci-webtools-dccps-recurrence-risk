@@ -1,10 +1,16 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
-  selector: 'rrt-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  title = 'rrt';
+  links = [
+    { title: "Group Data", target: "/group-data" },
+    { title: "Individual Data", target: "/individual-data" },
+  ];
+
+  constructor(public route: ActivatedRoute) {}
 }

@@ -1,52 +1,31 @@
-import { TestBed, async } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Component } from '@angular/core';
-import { AppComponent } from './app.component';
+import { TestBed } from "@angular/core/testing";
+import { RouterTestingModule } from "@angular/router/testing";
+import { AppComponent } from "./app.component";
 
-@Component({
-  selector: 'rrt-header',
-  template: '<h1>Welcome to nci-webtools-dccps-recurrence-risk!</h1>'
-})
-class MockHeaderComponent { }
-
-
-@Component({
-  selector: 'rrt-footer',
-  template: ''
-})
-class MockFooterComponent { }
-
-describe('AppComponent', () => {
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        AppComponent,
-        MockHeaderComponent,
-        MockFooterComponent
-      ],
-      imports: [
-        RouterTestingModule
-      ]
+describe("AppComponent", () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
+      declarations: [AppComponent],
     }).compileComponents();
-  }));
+  });
 
-  it('should create the app', async(() => {
+  it("should create the app", () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
+    const app = fixture.componentInstance;
     expect(app).toBeTruthy();
-  }));
+  });
 
-  it(`should have as title 'rrt'`, async(() => {
+  it(`should have as title 'recurrence-risk-client'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    app.title = 'my title';
-    expect(app.title).toEqual('my title');
-  }));
+    const app = fixture.componentInstance;
+    expect(app.title).toEqual("recurrence-risk-client");
+  });
 
-  it('should render title in a h1 tag', async(() => {
+  it("should render title", () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to nci-webtools-dccps-recurrence-risk!');
-  }));
+    const compiled = fixture.nativeElement;
+    expect(compiled.querySelector(".content span").textContent).toContain("recurrence-risk-client app is running!");
+  });
 });
