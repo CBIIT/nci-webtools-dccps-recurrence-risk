@@ -1,6 +1,4 @@
-# example build command (from repository root)
-# docker build -t recurrence:backend -f docker/backend.dockerfile --build-args SPARRPOWR_TAG=CBIIT .
-FROM centos:8.3.2011
+FROM ${BACKEND_BASE_IMAGE:-quay.io/centos/centos:stream8}
 
 RUN dnf -y update \
  && dnf -y install \
@@ -12,28 +10,31 @@ RUN dnf -y update \
  && dnf -y install \
     nodejs \
     R \
-    libcurl-devel \
  && dnf clean all
 
 ENV R_REMOTES_NO_ERRORS_FROM_WARNINGS="true"
 
-# install sparrpowR dependencies
 RUN Rscript -e "install.packages(c(\
-    'remotes', \
     'jsonlite', \
-    'flexsurvcure', \
-    'data.table' \
-), repos='https://cloud.r-project.org/'); \
-   remotes::install_github('cran/SEER2R')"
+    'remotes' \
+), repos='https://cloud.r-project.org/')"
 
-RUN mkdir /api
+# ensure RecurRisk and dependencies are installed
+RUN Rscript -e "remotes::install_github('cran/SEER2R', ref='1.0')"
+RUN Rscript -e "remotes::install_github('cran/RecurRisk', ref='1.0.2')"
 
-WORKDIR /api
+# install updated version of RecurRisk if applicable (do not remove previous RUN step, as that installs dependencies for RecurRisk)
+ARG RECURRISK_R_PACKAGE_TAG=master
+RUN Rscript -e "remotes::install_github('cran/RecurRisk', ref='$RECURRISK_R_PACKAGE_TAG', upgrade='never')"
 
-COPY api/package*.json /api/
+RUN mkdir -p /app/server
+
+WORKDIR /app/server
+
+COPY server/package.json /app/server/
 
 RUN npm install
 
-COPY api /api/
+COPY server /app/server/
 
 CMD npm start
