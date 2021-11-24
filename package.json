@@ -20,7 +20,7 @@
   "homepage": "https://github.com/CBIIT/nci-webtools-dccps-recurrence-risk#readme",
   "devDependencies": {
     "husky": "^7.0.4",
-    "lint-staged": "^12.0.2",
+    "lint-staged": "^12.1.2",
     "prettier": "^2.4.1"
   },
   "prettier": {
