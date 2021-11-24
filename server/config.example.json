@@ -20,7 +20,7 @@
     "pollInteral": 60
   },
   "email": {
-    "admin": "admin@example.com",
+    "admins": ["admin@example.com"],
     "sender": "admin@example.com",
     "smtp": {
       "host": "example-smtp-host"

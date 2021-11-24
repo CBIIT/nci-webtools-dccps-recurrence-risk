@@ -69,7 +69,7 @@ processMessages({
 
       await transport.sendMail({
         from: config.email.sender,
-        to: config.email.sender,
+        to: config.email.admins,
         subject: "Recurrence Risk Tool Failure",
         html: adminFailureEmailTemplate({
           ...input.params,
