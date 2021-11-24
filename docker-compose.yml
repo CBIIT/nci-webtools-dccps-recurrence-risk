@@ -29,8 +29,7 @@ services:
         FRONTEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
     environment:
       APP_PATH: /recurrence
-      API_HOST: http://recurrence-risk-backend
-      API_PORT: 8000
+      API_BASE_URL: http://recurrence-risk-backend:8000
     links:
       - recurrence-risk-backend:recurrence-risk-backend
     ports:
