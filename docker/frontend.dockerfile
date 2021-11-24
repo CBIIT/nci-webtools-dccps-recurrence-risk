@@ -6,7 +6,7 @@ RUN dnf -y update \
     epel-release \
     glibc-langpack-en \
  && dnf config-manager --set-enabled powertools \
- && dnf -y module enable nodejs:14 \
+ && dnf -y module enable nodejs:16 \
  && dnf -y install \
     httpd \
     nodejs \
