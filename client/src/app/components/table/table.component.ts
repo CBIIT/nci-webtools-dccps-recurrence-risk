@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, QueryList, ViewChildren } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { FileService } from "src/app/services/file/file.service";
 import { SortableHeaderDirective, SortEvent } from "./sortable-header.directive";
 
 export type Value = number | string | null;
@@ -37,7 +36,6 @@ export class TableComponent implements OnInit, OnChanges {
     else if (!isNaN(value as number)) return Number((+value).toFixed(9));
     else return String(value);
   };
-  @Input() downloadFileNameFormatter: () => string = () => "results.csv";
 
   activeData: any[] = [];
   readonly defaultFilter: (value: any[]) => any[] = (v) => v;
@@ -47,7 +45,7 @@ export class TableComponent implements OnInit, OnChanges {
   pageSizeControl: FormControl = new FormControl(this.pageSize);
   math = Math;
 
-  constructor(private fileService: FileService) {}
+  constructor() {}
 
   ngOnInit(): void {
     this.searchControl.valueChanges.subscribe((value) => {
@@ -101,14 +99,6 @@ export class TableComponent implements OnInit, OnChanges {
       return a - b;
     } else {
       return String(a).localeCompare(String(b));
-    }
-  }
-
-  download() {
-    if (this.data.length) {
-      const data = this.activeData.length ? this.activeData : this.data;
-      const fileName = this.downloadFileNameFormatter();
-      this.fileService.downloadCsv(data, fileName);
     }
   }
 }
