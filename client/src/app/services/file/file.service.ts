@@ -194,7 +194,11 @@ export class FileService {
 
   downloadCsv(data: Record[], filename: string) {
     const contents = stringifyCsv(data);
-    const blob = new Blob([contents], { type: "text/plain;charset=utf-8" });
+    this.downloadText(contents, filename);
+  }
+
+  downloadText(text: string, filename: string) {
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     saveAs(blob, filename);
   }
 }
