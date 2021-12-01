@@ -30,7 +30,12 @@ export class GroupDataComponent implements OnInit {
       this.error = null;
       this.loading = true;
       this.parameters = parameters;
-      this.results = (await this.recurrenceRiskService.getRiskFromGroupData(parameters).toPromise()) as any;
+
+      if (parameters.results) {
+        this.results = parameters.results;
+      } else {
+        this.results = (await this.recurrenceRiskService.getRiskFromGroupData(parameters).toPromise()) as any;
+      }
     } catch (e) {
       this.error = e;
       console.log(e);
