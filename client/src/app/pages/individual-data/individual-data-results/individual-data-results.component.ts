@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { Header, Row } from "src/app/components/table/table.component";
+import { FileService } from "src/app/services/file/file.service";
 
 @Component({
   selector: "app-individual-data-results",
@@ -29,17 +30,17 @@ export class IndividualDataResultsComponent implements OnInit {
     { key: "obs_dist_surv", title: "obs_dist_surv" },
   ];
 
-  @Input() data: Row[] = [];
+  @Input() results: Row[] = [];
   @Input() parameters: any = {};
   headers: Header[] = this.defaultHeaders;
 
-  constructor() {}
+  constructor(private fileService: FileService) {}
 
   ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.data && this.data.length > 0) {
-      this.headers = Object.keys(this.data[0]).map((name) => ({
+    if (this.results && this.results.length > 0) {
+      this.headers = Object.keys(this.results[0]).map((name) => ({
         key: name,
         title: name,
       }));
@@ -48,16 +49,34 @@ export class IndividualDataResultsComponent implements OnInit {
     }
   }
 
-  downloadFileNameFormatter = () => {
-    if (this.parameters && this.parameters.individualDataFileName) {
-      const fileName = this.parameters.individualDataFileName.replace(/.csv$/i, "");
-      const d = new Date();
-      const timestamp = [
-        [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((value) => String(value).padStart(2, "0")).join(""),
-        [d.getHours(), d.getMinutes(), d.getSeconds()].map((value) => String(value).padStart(2, "0")).join(""),
-      ].join("_");
-      return `${fileName}_results_${timestamp}.csv`;
+  downloadResults() {
+    if (this.parameters && this.results?.length) {
+      const fileNamePrefix = this.parameters.individualDataFileName || "individual_data";
+      const timestamp = this.getTimestamp();
+      const fileName = `${fileNamePrefix}_results_${timestamp}.csv`;
+      this.fileService.downloadCsv(this.results, fileName);
     }
-    return "results.csv";
-  };
+  }
+
+  downloadWorkspace() {
+    if (this.parameters && this.results?.length) {
+      const fileNamePrefix = this.parameters.individualDataFileName || "individual_data";
+      const timestamp = this.getTimestamp();
+      const fileName = `${fileNamePrefix}_workspace_${timestamp}.json`;
+      const fileContents = JSON.stringify({
+        parameters: this.parameters,
+        results: this.results,
+      });
+      this.fileService.downloadText(fileContents, fileName);
+    }
+  }
+
+  getTimestamp() {
+    // todo: replace with date-fns/format
+    const d = new Date();
+    return [
+      [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((value) => String(value).padStart(2, "0")).join(""),
+      [d.getHours(), d.getMinutes(), d.getSeconds()].map((value) => String(value).padStart(2, "0")).join(""),
+    ].join("_");
+  }
 }

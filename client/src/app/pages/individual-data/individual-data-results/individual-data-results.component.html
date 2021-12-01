@@ -1,3 +1,13 @@
 <div class="table-responsive">
-  <app-table [headers]="headers" [data]="data" [downloadFileNameFormatter]="downloadFileNameFormatter"></app-table>
+  <app-table [headers]="headers" [data]="results">
+    <div ngbDropdown class="d-inline-block" container="body" placement="bottom-right">
+      <button class="btn btn-outline-primary" id="downloadIndividualDataResultsDropdown" ngbDropdownToggle>
+        Download
+      </button>
+      <div ngbDropdownMenu aria-labelledby="downloadIndividualDataResultsDropdown">
+        <button (click)="downloadResults()" ngbDropdownItem>Results</button>
+        <button (click)="downloadWorkspace()" ngbDropdownItem>Workspace</button>
+      </div>
+    </div>
+  </app-table>
 </div>
