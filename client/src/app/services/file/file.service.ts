@@ -122,6 +122,16 @@ export class FileService {
   }
 
   /**
+   * Parses a json file as an object
+   * @param file
+   * @returns
+   */
+  async parseJsonFile(file: File): Promise<any> {
+    const fileContents = (await this.readFile(file)) as string;
+    return JSON.parse(fileContents);
+  }
+
+  /**
    * Parses a CSV file as a data frame
    * @param csvFile
    * @param options
