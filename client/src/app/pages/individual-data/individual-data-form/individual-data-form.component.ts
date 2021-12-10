@@ -1,25 +1,9 @@
 import { Component, OnInit, Output, EventEmitter } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { DataFrameHeader, FileService } from "src/app/services/file/file.service";
-import { Row } from "src/app/components/table/table.component";
-import { combineLatest, zip } from "rxjs";
 import { SelectOption } from "src/app/components/multiselect/multiselect.component";
-
-export type IndividualDataParameters = {
-  individualData: Row[];
-  individualDataFileName: string;
-  strata: number[];
-  covariates: number[];
-  timeVariable: string;
-  eventVariable: string;
-  distribution: string;
-  stageVariable: string;
-  distantStageValue: number;
-  adjustmentFactorR: number;
-  followUpYears: number;
-  queue: boolean;
-  email: string;
-};
+import { IndividualDataParameters, IndividualDataWorkspace } from "../individual-data.types";
+import { DEFAULT_INDIVIDUAL_DATA_PARAMETERS as defaults } from "../individual-data.defaults";
 
 @Component({
   selector: "app-individual-data-form",
@@ -27,204 +11,148 @@ export type IndividualDataParameters = {
   styleUrls: ["./individual-data-form.component.scss"],
 })
 export class IndividualDataFormComponent implements OnInit {
+  @Output() loadWorkspace = new EventEmitter<IndividualDataWorkspace>();
   @Output() submit = new EventEmitter<IndividualDataParameters>();
-  @Output() reset = new EventEmitter();
+  @Output() reset = new EventEmitter<void>();
   form = new FormGroup({
     individualDataFile: new FormControl(null, [Validators.required]),
-    individualDataFileName: new FormControl("", [Validators.required]),
-    individualDataHeaders: new FormControl([], [Validators.required]),
-    individualData: new FormControl([], [Validators.required]),
-    strata: new FormControl([]),
-    covariates: new FormControl([]),
-    timeVariable: new FormControl("", [Validators.required]),
-    eventVariable: new FormControl("", [Validators.required]),
-    distribution: new FormControl("", [Validators.required]),
-    stageVariable: new FormControl("", [Validators.required]),
-    distantStageValue: new FormControl("", [Validators.required]),
-    adjustmentFactorR: new FormControl(1, [Validators.required, Validators.min(0.5), Validators.max(2)]),
-    followUpYears: new FormControl(25, [Validators.required, Validators.min(1)]),
-    queue: new FormControl(false, []),
-    email: new FormControl("", []),
+    individualData: new FormControl(defaults.individualData, [Validators.required]),
+    individualDataFileName: new FormControl(defaults.individualDataFileName, [Validators.required]),
+    individualDataHeaders: new FormControl(defaults.individualDataHeaders, [Validators.required]),
+    strata: new FormControl(defaults.strata),
+    covariates: new FormControl(defaults.covariates),
+    timeVariable: new FormControl(defaults.timeVariable, [Validators.required]),
+    eventVariable: new FormControl(defaults.eventVariable, [Validators.required]),
+    distribution: new FormControl(defaults.distribution, [Validators.required]),
+    stageVariable: new FormControl(defaults.stageVariable, [Validators.required]),
+    distantStageValue: new FormControl(defaults.distantStageValue, [Validators.required]),
+    adjustmentFactorR: new FormControl(defaults.adjustmentFactorR, [
+      Validators.required,
+      Validators.min(0.5),
+      Validators.max(2),
+    ]),
+    followUpYears: new FormControl(defaults.followUpYears, [Validators.required, Validators.min(1)]),
+    queue: new FormControl(defaults.queue, []),
+    email: new FormControl(defaults.email, []),
   });
   headerControls: { [key: string]: string } = {};
   loading: boolean = false;
 
-  constructor(private fileService: FileService) {}
-
-  ngOnInit(): void {
-    this.subscribe();
+  constructor(private fileService: FileService) {
+    this.handleReset = this.handleReset.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleFormValueChange = this.handleFormValueChange.bind(this);
+    this.handleIndividualDataFileChange = this.handleIndividualDataFileChange.bind(this);
+    this.handleTimeVariableChange = this.handleTimeVariableChange.bind(this);
   }
 
-  handleReset(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
+  ngOnInit(): void {
+    this.form.valueChanges.subscribe(this.handleFormValueChange);
+    this.form.controls.individualDataFile.valueChanges.subscribe(this.handleIndividualDataFileChange);
+    this.form.controls.timeVariable.valueChanges.subscribe(this.handleTimeVariableChange);
+  }
+
+  handleReset(event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     this.form.reset({
       individualDataFile: null,
-      individualDataHeaders: [],
-      individualData: [],
-      strata: [],
-      covariates: [],
-      timeVariable: "",
-      eventVariable: "",
-      distribution: "",
-      stageVariable: "",
-      distantStageValue: "",
-      adjustmentFactorR: 1,
-      followUpYears: 25,
-      queue: false,
-      email: "",
+      ...defaults,
     });
 
     this.reset.emit();
-
     return false;
   }
 
-  handleSubmit(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
+  handleSubmit(event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
       return false;
     }
 
-    const {
-      individualData,
-      individualDataFileName,
-      strata,
-      covariates,
-      timeVariable,
-      eventVariable,
-      distribution,
-      stageVariable,
-      distantStageValue,
-      adjustmentFactorR,
-      followUpYears,
-      queue,
-      email,
-    } = this.form.value;
-
     this.submit.emit({
-      individualData,
-      individualDataFileName,
-      strata,
-      covariates,
-      timeVariable,
-      eventVariable,
-      distribution,
-      stageVariable,
-      distantStageValue,
-      adjustmentFactorR,
-      followUpYears,
-      queue,
-      email,
+      individualData: this.form.value.individualData,
+      individualDataFileName: this.form.value.individualDataFileName,
+      individualDataHeaders: this.form.value.individualDataHeaders,
+      strata: this.form.value.strata,
+      covariates: this.form.value.covariates,
+      timeVariable: this.form.value.timeVariable,
+      eventVariable: this.form.value.eventVariable,
+      distribution: this.form.value.distribution,
+      stageVariable: this.form.value.stageVariable,
+      distantStageValue: this.form.value.distantStageValue,
+      adjustmentFactorR: this.form.value.adjustmentFactorR,
+      followUpYears: this.form.value.followUpYears,
+      queue: this.form.value.queue,
+      email: this.form.value.email,
     });
 
     return false;
   }
 
-  subscribe() {
-    const {
-      individualDataFile,
-      individualDataFileName,
-      individualDataHeaders,
-      individualData,
-      strata,
-      covariates,
-      timeVariable,
-      eventVariable,
-      email,
-      queue,
-      followUpYears,
-    } = this.form.controls;
+  handleFormValueChange(formValue: any) {
+    const { queue, email } = this.form.controls;
 
-    this.form.valueChanges.subscribe((formValue) => {
-      // ensure that queueing is enabled if required
-      const shouldQueue = this.shouldQueue(formValue);
-      if (shouldQueue && !queue.value) {
-        // do not uncheck queue
-        queue.setValue(true, { emitEvent: false });
-      }
+    if (this.shouldQueue(formValue)) {
+      queue.setValue(true, { emitEvent: false });
+      email.setValidators([Validators.required, Validators.email]);
+    } else {
+      email.clearValidators();
+    }
+  }
 
-      // map headers to controls
-      const controls = ["strata", "covariates", "timeVariable", "eventVariable"];
-      const headers = formValue.individualDataHeaders?.map((header: DataFrameHeader) => header.name);
+  async handleIndividualDataFileChange(fileList: FileList) {
+    if (fileList?.length) {
+      try {
+        const individualDataFile = fileList[0];
+        const dataFrame = await this.fileService.parseCsvFile(individualDataFile);
 
-      this.headerControls =
-        headers?.reduce((headerControls: any, header: string) => {
-          for (const controlName of controls) {
-            if (formValue[controlName].includes(header)) {
-              headerControls[header] = controlName;
-            }
-          }
-          return headerControls;
-        }, {}) || {};
-
-      // console.log(formValue, this.headerControls);
-    });
-
-    timeVariable?.valueChanges.subscribe((name) => {
-      const header: DataFrameHeader = individualDataHeaders.value?.find(
-        (dataHeader: DataFrameHeader) => dataHeader.name === name,
-      );
-
-      if (header) {
-        const maxFollowUpYears = header.factors
-          ?.map((factor) => Number(factor.value))
-          .reduce((max, value) => Math.max(max, value));
-
-        followUpYears.setValue(Math.min(maxFollowUpYears || 25, 25));
-      }
-    });
-
-    individualDataFile.valueChanges.subscribe(async (fileList: FileList) => {
-      if (fileList && fileList.length > 0) {
-        try {
-          const file = fileList[0];
-          const { data, headers } = await this.fileService.parseCsvFile(file);
-
-          this.form.patchValue({
-            individualDataHeaders: headers,
-            individualDataFileName: file.name,
-            individualData: data,
-            strata: [],
-            covariates: [],
-            timeVariable: "",
-            eventVariable: "",
-            distribution: "",
-            stageVariable: "",
-            distantStageValue: "",
-            adjustmentFactorR: 1,
-            followupYears: 25,
-          });
-        } catch (e) {
-          console.log(e);
-        } finally {
-          this.loading = false;
-        }
-      } else {
         this.form.patchValue({
-          individualDataHeaders: [],
-          individualDataFileName: "",
-          individualData: [],
-          strata: [],
-          covariates: [],
-          timeVariable: "",
-          eventVariable: "",
-          distribution: "",
-          stageVariable: "",
-          distantStageValue: "",
-          adjustmentFactorR: 1,
-          followupYears: 25,
+          ...defaults,
+          individualData: dataFrame.data,
+          individualDataHeaders: dataFrame.headers,
+          individualDataFileName: individualDataFile.name,
         });
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.loading = false;
       }
-    });
+    } else {
+      this.form.patchValue(defaults);
+    }
+  }
+
+  handleTimeVariableChange(timeVariable: string) {
+    const timeVariableHeader: DataFrameHeader = this.getHeaderByName(timeVariable);
+    const maxFollowUpYears = this.getMaxFactorValue(timeVariableHeader) || defaults.followUpYears;
+    const followUpYears = Math.min(maxFollowUpYears, defaults.followUpYears);
+    this.form.patchValue({ followUpYears });
   }
 
   isDisabled(headerName: string, formControlName: string) {
-    return Boolean(this.headerControls[headerName] && this.headerControls[headerName] !== formControlName);
+    const controls = ["strata", "covariates", "timeVariable", "eventVariable"];
+    const headers = this.form.value.individualDataHeaders?.map((header: DataFrameHeader) => header.name);
+    const headerControls =
+      headers?.reduce((headerControls: any, header: string) => {
+        for (const controlName of controls) {
+          if (this.form.value[controlName].includes(header)) {
+            headerControls[header] = controlName;
+          }
+        }
+        return headerControls;
+      }, {}) || {};
+
+    return Boolean(headerControls[headerName] && headerControls[headerName] !== formControlName);
   }
 
   shouldQueue(formValue: any) {
@@ -239,7 +167,15 @@ export class IndividualDataFormComponent implements OnInit {
     }));
   }
 
+  getHeaderByName(name: string): DataFrameHeader {
+    return this.form.controls.individualDataHeaders.value?.find((header: DataFrameHeader) => header.name === name);
+  }
+
   getFactors(headers: DataFrameHeader[], name: string) {
     return headers?.find((header) => header.name === name)?.factors || [];
+  }
+
+  getMaxFactorValue(header?: DataFrameHeader) {
+    return header?.factors?.map((factor) => Number(factor.value)).reduce((max, value) => Math.max(max, value));
   }
 }
