@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { GroupDataParameters } from "src/app/pages/group-data/group-data-form/group-data-form.component";
+import { GroupDataParameters } from "src/app/pages/group-data/group-data.types";
 import { Row } from "src/app/components/table/table.component";
 
 @Injectable({
