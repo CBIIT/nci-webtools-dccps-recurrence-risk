@@ -1,13 +1,16 @@
 import { Component, OnInit, Output, EventEmitter } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { DataFrameHeader, FileService } from "src/app/services/file/file.service";
+import { DataFrameHeader, FileService, IniConfig } from "src/app/services/file/file.service";
 import { Row } from "src/app/components/table/table.component";
-import { seerStatFilesValidator } from "./validators";
+import { seerStatDataFilesValidator } from "./validators";
+import { GroupDataWorkspace } from "../group-data-workspace";
 
 export type GroupDataParameters = {
-  seerStatFileName: string;
   seerStatData: Row[];
+  seerStatDataFileNames: string[];
   canSurvData: Row[];
+  canSurvDataFileName: string;
+  seerStatDictionary: DataFrameHeader[];
   stageVariable: string;
   distantStageValue: number;
   adjustmentFactorR: number;
@@ -20,11 +23,17 @@ export type GroupDataParameters = {
   styleUrls: ["./group-data-form.component.scss"],
 })
 export class GroupDataFormComponent implements OnInit {
+  @Output() loadWorkspace = new EventEmitter<GroupDataWorkspace>();
   @Output() submit = new EventEmitter<GroupDataParameters>();
-  @Output() reset = new EventEmitter();
+  @Output() reset = new EventEmitter<void>();
   form = new FormGroup({
-    seerStatFiles: new FormControl(null, [seerStatFilesValidator]),
+    inputFileType: new FormControl("seerStatAndCanSurvFiles", [Validators.required]),
+    workspaceDataFile: new FormControl(null),
+    workspaceDataFileName: new FormControl(""),
+    seerStatDataFiles: new FormControl(null, [seerStatDataFilesValidator]),
+    seerStatDataFileNames: new FormControl([]),
     canSurvDataFile: new FormControl(null, [Validators.required]),
+    canSurvDataFileName: new FormControl(""),
     seerStatDictionary: new FormControl([], [Validators.required]),
     seerStatData: new FormControl([], [Validators.required]),
     canSurvData: new FormControl([], [Validators.required]),
@@ -34,10 +43,24 @@ export class GroupDataFormComponent implements OnInit {
     followUpYears: new FormControl(25, [Validators.required, Validators.min(1)]),
   });
 
-  constructor(private fileService: FileService) {}
+  constructor(private fileService: FileService) {
+    // bind event handlers to the current context
+    this.handleReset = this.handleReset.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleInputFileTypeChange = this.handleInputFileTypeChange.bind(this);
+    this.handleWorkspaceDataFileChange = this.handleWorkspaceDataFileChange.bind(this);
+    this.handleSeerStatDataFilesChange = this.handleSeerStatDataFilesChange.bind(this);
+    this.handleCanSurvDataFileChange = this.handleCanSurvDataFileChange.bind(this);
+    this.handleStageVariableChange = this.handleStageVariableChange.bind(this);
+  }
 
   ngOnInit(): void {
-    this.subscribe();
+    // register event handlers for form value change events
+    this.form.controls.inputFileType.valueChanges.subscribe(this.handleInputFileTypeChange);
+    this.form.controls.workspaceDataFile.valueChanges.subscribe(this.handleWorkspaceDataFileChange);
+    this.form.controls.seerStatDataFiles.valueChanges.subscribe(this.handleSeerStatDataFilesChange);
+    this.form.controls.canSurvDataFile.valueChanges.subscribe(this.handleCanSurvDataFileChange);
+    this.form.controls.stageVariable.valueChanges.subscribe(this.handleStageVariableChange);
   }
 
   handleReset(event: Event) {
@@ -45,7 +68,9 @@ export class GroupDataFormComponent implements OnInit {
     event.stopPropagation();
 
     this.form.reset({
-      seerStatFiles: null,
+      inputFileType: "seerStatAndCanSurvFiles",
+      workspaceFile: null,
+      seerStatDataFiles: null,
       canSurvDataFile: null,
       seerStatDictionary: null,
       seerStatData: [],
@@ -57,7 +82,6 @@ export class GroupDataFormComponent implements OnInit {
     });
 
     this.reset.emit();
-
     return false;
   }
 
@@ -70,116 +94,164 @@ export class GroupDataFormComponent implements OnInit {
       return false;
     }
 
-    const {
-      seerStatFiles,
-      seerStatData,
-      canSurvData,
-      stageVariable,
-      distantStageValue,
-      adjustmentFactorR,
-      followUpYears,
-    } = this.form.value;
-
-    const seerStatFileName = seerStatFiles[0].name.replace(/\.(dic|txt)$/i, "");
+    console.log(this.form.value);
 
     this.submit.emit({
-      seerStatFileName,
-      seerStatData,
-      canSurvData,
-      stageVariable,
-      distantStageValue,
-      adjustmentFactorR,
-      followUpYears,
+      seerStatData: this.form.value.seerStatData,
+      seerStatDataFileNames: this.form.value.seerStatDataFileNames,
+      canSurvData: this.form.value.canSurvData,
+      canSurvDataFileName: this.form.value.canSurvDataFileName,
+      seerStatDictionary: this.form.value.seerStatDictionary,
+      stageVariable: this.form.value.stageVariable,
+      distantStageValue: this.form.value.distantStageValue,
+      adjustmentFactorR: this.form.value.adjustmentFactorR,
+      followUpYears: this.form.value.followUpYears,
     });
 
     return false;
   }
 
-  subscribe() {
-    const {
-      seerStatFiles,
-      seerStatDictionary,
-      seerStatData,
-      canSurvDataFile,
-      canSurvData,
-      stageVariable,
-      distantStageValue,
-      followUpYears,
-    } = this.form.controls;
-    const isStageVariable = (name: string) => /stage/i.test(name);
-    const isDistantStageValue = ({ label }: any) => /distant/i.test(label);
+  /**
+   * Sets validators for input files based on selected file type
+   * @param inputFileType
+   */
+  handleInputFileTypeChange(inputFileType: string) {
+    const { workspaceDataFile, seerStatDataFiles, canSurvDataFile } = this.form.controls;
 
-    // this.form.valueChanges.subscribe(console.log);
-
-    // parse the cansurv data file once it becomes available
-    canSurvDataFile?.valueChanges.subscribe(async (fileList: FileList) => {
-      const csvFile = fileList && fileList[0];
-
-      if (csvFile) {
-        const { data } = await this.fileService.parseCsvFile(csvFile);
-        canSurvData?.setValue(data);
-      } else {
-        canSurvData?.setValue([]);
-      }
+    this.form.patchValue({
+      workspaceDataFile: null,
+      seerStatDataFiles: null,
+      canSurvDataFile: null,
     });
 
-    // parse both the seer*stat dictionary and data files at the same time
-    seerStatFiles?.valueChanges.subscribe(async (fileList: FileList) => {
-      if (fileList) {
-        const files = Array.from(fileList);
-        const dictionaryFile = files.find((file: File) => /.dic$/i.test(file.name));
-        const dataFile = files.find((file: File) => /.txt$/i.test(file.name));
+    if (inputFileType === "seerStatAndCanSurvFiles") {
+      workspaceDataFile.clearValidators();
+      seerStatDataFiles.setValidators([Validators.required]);
+      canSurvDataFile.setValidators([Validators.required]);
+    } else if (inputFileType === "workspaceFile") {
+      workspaceDataFile.setValidators([Validators.required]);
+      seerStatDataFiles.clearValidators();
+      canSurvDataFile.clearValidators();
+    }
 
+    workspaceDataFile.updateValueAndValidity();
+    seerStatDataFiles.updateValueAndValidity();
+    canSurvDataFile.updateValueAndValidity();
+  }
+
+  /**
+   * Recreates workspace from input file and populates form with data
+   * @param fileList
+   */
+  async handleWorkspaceDataFileChange(fileList: FileList) {
+    if (fileList?.length) {
+      try {
+        const workspaceDataFile = fileList[0];
+
+        const workspaceData = await this.fileService.parseJsonFile(workspaceDataFile);
+        const parameters = workspaceData.parameters as GroupDataParameters;
+        const results = workspaceData.results as Row[];
+        const workspace = new GroupDataWorkspace(parameters, results);
+        this.form.patchValue({ ...parameters, workspaceDataFileName: workspaceDataFile.name });
+        this.loadWorkspace.emit(workspace);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  /**
+   * Parses SEER*STAT data files as a dataframe and stores it in the form.
+   * @param fileList - A FileList of SEER*STAT data files.
+   */
+  async handleSeerStatDataFilesChange(fileList: FileList) {
+    if (fileList) {
+      const files = Array.from(fileList);
+      const dictionaryFile = files.find((file: File) => /.dic$/i.test(file.name));
+      const dataFile = files.find((file: File) => /.txt$/i.test(file.name));
+
+      try {
         if (dictionaryFile && dataFile) {
           // parse SEER*Stat files to extract dictionary headers and data
           const { headers, config } = await this.fileService.parseSeerStatDictionary(dictionaryFile);
           const { data } = await this.fileService.parseSeerStatFiles(dictionaryFile, dataFile);
 
-          // determine the maximum number of followup years
-          const sessionOptions = config["Session Options"];
-          const numberOfIntervals = +sessionOptions?.NumberOfIntervals || 30;
-          const monthsPerInterval = +sessionOptions?.MonthsPerInterval || 12;
-          const maxFollowUpYears = Math.ceil((monthsPerInterval * numberOfIntervals) / 12);
-
-          // determine the first stage variable which has a distant stage value
-          const stageVariableMatch = headers.find(
-            (header) => isStageVariable(header.name) && header.factors?.find(isDistantStageValue),
-          );
+          // by default, use 25 years of follow-up (less if there are fewer years of follow-up in the data)
+          const followUpYears = Math.min(25, this.getMaxFollowUpYears(config));
 
           // set dependent form values
           this.form.patchValue({
+            seerStatDataFileNames: [dictionaryFile.name, dataFile.name],
             seerStatDictionary: headers,
             seerStatData: data,
-            stageVariable: stageVariableMatch?.name || "",
-            followUpYears: Math.min(25, maxFollowUpYears),
+            followUpYears,
           });
         } else {
-          // reset dependent form values if a SEER*Stat file is missing
-          this.form.patchValue({
-            seerStatDictionary: [],
-            seerStatData: [],
-            stageVariable: "",
-            followUpYears: 25,
-          });
+          throw new Error("Invalid SEER*STAT files selected.");
         }
-
-        seerStatDictionary?.markAsTouched();
-        seerStatData?.markAsTouched();
-        stageVariable?.markAsTouched();
-        followUpYears?.markAsTouched();
+      } catch (e) {
+        // reset dependent form values if a SEER*Stat file is missing
+        console.log(e);
+        this.form.patchValue({
+          seerStatDataFileNames: [],
+          seerStatDictionary: [],
+          seerStatData: [],
+          stageVariable: "",
+          followUpYears: 25,
+        });
       }
-    });
-
-    // update distant stage value whenever the stage variable changes
-    stageVariable?.valueChanges.subscribe((value) => {
-      const factors = this.getFactors(seerStatDictionary.value, value);
-      const distantStageValueMatch = factors.find(isDistantStageValue);
-      distantStageValue?.setValue(distantStageValueMatch?.value || "");
-      distantStageValue?.markAsTouched();
-    });
+    }
   }
 
+  /**
+   * Parses the given CanSurv data file and stores it in the form.
+   * @param fileList - A FileList of CanSurv data files.
+   */
+  async handleCanSurvDataFileChange(fileList: FileList) {
+    const canSurvDataFile = fileList && fileList[0];
+
+    if (canSurvDataFile) {
+      const { data } = await this.fileService.parseCsvFile(canSurvDataFile);
+      this.form.patchValue({
+        canSurvDataFileName: canSurvDataFile.name,
+        canSurvData: data,
+      });
+    } else {
+      this.form.patchValue({
+        canSurvDataFileName: "",
+        canSurvData: [],
+      });
+    }
+  }
+
+  /**
+   * Clears distant stage variable whenever the stage variable changes
+   */
+  handleStageVariableChange() {
+    this.form.patchValue({ distantStageValue: "" });
+  }
+
+  /**
+   * Retrieves all factors for a given DataFrame header
+   * @param headers
+   * @param name
+   * @returns
+   */
   getFactors(headers: DataFrameHeader[], name: string) {
     return headers?.find((header) => header.name === name)?.factors || [];
+  }
+
+  /**
+   * Retrieves the maximum number of follow-up years from the SEER*Stat dictionary
+   * @param seerStatDictionryConfig
+   * @returns
+   */
+  getMaxFollowUpYears(seerStatDictionryConfig: IniConfig) {
+    // determine the maximum number of followup years
+    const sessionOptions = seerStatDictionryConfig["Session Options"];
+    const numberOfIntervals = +sessionOptions?.NumberOfIntervals || 30;
+    const monthsPerInterval = +sessionOptions?.MonthsPerInterval || 12;
+    const maxFollowUpYears = Math.ceil((monthsPerInterval * numberOfIntervals) / 12);
+    return maxFollowUpYears;
   }
 }
