@@ -3,19 +3,8 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { DataFrameHeader, FileService, IniConfig } from "src/app/services/file/file.service";
 import { Row } from "src/app/components/table/table.component";
 import { seerStatDataFilesValidator } from "./validators";
-import { GroupDataWorkspace } from "../group-data-workspace";
-
-export type GroupDataParameters = {
-  seerStatData: Row[];
-  seerStatDataFileNames: string[];
-  canSurvData: Row[];
-  canSurvDataFileName: string;
-  seerStatDictionary: DataFrameHeader[];
-  stageVariable: string;
-  distantStageValue: number;
-  adjustmentFactorR: number;
-  followUpYears: number;
-};
+import { GroupDataParameters, GroupDataWorkspace } from "../group-data.types";
+import { DEFAULT_GROUP_DATA_PARAMETERS as defaults } from "../group-data.defaults";
 
 @Component({
   selector: "app-group-data-form",
@@ -29,18 +18,22 @@ export class GroupDataFormComponent implements OnInit {
   form = new FormGroup({
     inputFileType: new FormControl("seerStatAndCanSurvFiles", [Validators.required]),
     workspaceDataFile: new FormControl(null),
-    workspaceDataFileName: new FormControl(""),
     seerStatDataFiles: new FormControl(null, [seerStatDataFilesValidator]),
-    seerStatDataFileNames: new FormControl([]),
     canSurvDataFile: new FormControl(null, [Validators.required]),
-    canSurvDataFileName: new FormControl(""),
-    seerStatDictionary: new FormControl([], [Validators.required]),
-    seerStatData: new FormControl([], [Validators.required]),
-    canSurvData: new FormControl([], [Validators.required]),
-    stageVariable: new FormControl("", [Validators.required]),
-    distantStageValue: new FormControl("", [Validators.required]),
-    adjustmentFactorR: new FormControl(1, [Validators.required, Validators.min(0.5), Validators.max(2)]),
-    followUpYears: new FormControl(25, [Validators.required, Validators.min(1)]),
+    workspaceDataFileName: new FormControl(""),
+    seerStatDataFileNames: new FormControl(defaults.seerStatDataFileNames),
+    canSurvDataFileName: new FormControl(defaults.canSurvDataFileName),
+    seerStatDictionary: new FormControl(defaults.seerStatDictionary, [Validators.required]),
+    seerStatData: new FormControl(defaults.seerStatData, [Validators.required]),
+    canSurvData: new FormControl(defaults.canSurvData, [Validators.required]),
+    stageVariable: new FormControl(defaults.stageVariable, [Validators.required]),
+    distantStageValue: new FormControl(defaults.distantStageValue, [Validators.required]),
+    adjustmentFactorR: new FormControl(defaults.adjustmentFactorR, [
+      Validators.required,
+      Validators.min(0.5),
+      Validators.max(2),
+    ]),
+    followUpYears: new FormControl(defaults.followUpYears, [Validators.required, Validators.min(1)]),
   });
 
   constructor(private fileService: FileService) {
@@ -63,38 +56,35 @@ export class GroupDataFormComponent implements OnInit {
     this.form.controls.stageVariable.valueChanges.subscribe(this.handleStageVariableChange);
   }
 
-  handleReset(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
+  handleReset(event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     this.form.reset({
       inputFileType: "seerStatAndCanSurvFiles",
       workspaceFile: null,
       seerStatDataFiles: null,
       canSurvDataFile: null,
-      seerStatDictionary: null,
-      seerStatData: [],
-      canSurvData: [],
-      stageVariable: "",
-      distantStageValue: "",
-      adjustmentFactorR: 1,
-      followUpYears: 25,
+      ...defaults,
     });
 
     this.reset.emit();
     return false;
   }
 
-  handleSubmit(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
+  handleSubmit(event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
       return false;
     }
-
-    console.log(this.form.value);
 
     this.submit.emit({
       seerStatData: this.form.value.seerStatData,
@@ -147,11 +137,10 @@ export class GroupDataFormComponent implements OnInit {
     if (fileList?.length) {
       try {
         const workspaceDataFile = fileList[0];
-
         const workspaceData = await this.fileService.parseJsonFile(workspaceDataFile);
         const parameters = workspaceData.parameters as GroupDataParameters;
         const results = workspaceData.results as Row[];
-        const workspace = new GroupDataWorkspace(parameters, results);
+        const workspace = { parameters, results };
         this.form.patchValue({ ...parameters, workspaceDataFileName: workspaceDataFile.name });
         this.loadWorkspace.emit(workspace);
       } catch (error) {
@@ -193,11 +182,11 @@ export class GroupDataFormComponent implements OnInit {
         // reset dependent form values if a SEER*Stat file is missing
         console.log(e);
         this.form.patchValue({
-          seerStatDataFileNames: [],
-          seerStatDictionary: [],
-          seerStatData: [],
-          stageVariable: "",
-          followUpYears: 25,
+          seerStatDataFileNames: defaults.seerStatDataFileNames,
+          seerStatDictionary: defaults.seerStatDictionary,
+          seerStatData: defaults.seerStatData,
+          stageVariable: defaults.stageVariable,
+          followUpYears: defaults.followUpYears,
         });
       }
     }
@@ -218,8 +207,8 @@ export class GroupDataFormComponent implements OnInit {
       });
     } else {
       this.form.patchValue({
-        canSurvDataFileName: "",
-        canSurvData: [],
+        canSurvDataFileName: defaults.canSurvDataFileName,
+        canSurvData: defaults.canSurvData,
       });
     }
   }
@@ -228,7 +217,7 @@ export class GroupDataFormComponent implements OnInit {
    * Clears distant stage variable whenever the stage variable changes
    */
   handleStageVariableChange() {
-    this.form.patchValue({ distantStageValue: "" });
+    this.form.patchValue({ distantStageValue: defaults.distantStageValue });
   }
 
   /**
