@@ -186,11 +186,8 @@
       formControlName="distantStageValue"
       required
     >
-      <option value="" hidden>No distant stage value selected</option>
-      <option
-        *ngFor="let option of getFactors(form.value.individualDataHeaders, form.value.stageVariable)"
-        [value]="option.value"
-      >
+      <option value="0" hidden *ngIf="!form.controls.stageVariable.value">No distant stage value selected</option>
+      <option *ngFor="let option of getHeaderByName(form.value.stageVariable)?.factors" [value]="option.value">
         {{ option.value }}
       </option>
     </select>
@@ -282,7 +279,6 @@
       id="email"
       name="email"
       formControlName="email"
-      [required]="form.value?.queue"
     />
     <div *ngIf="form.controls.email?.touched && form.controls.email?.invalid" class="invalid-feedback">
       <div *ngIf="form.controls.email?.errors?.required">This field is required.</div>
