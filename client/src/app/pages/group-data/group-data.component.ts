@@ -1,8 +1,8 @@
-import { Component, OnInit } from "@angular/core";
-import { lastValueFrom, Observable } from "rxjs";
+import { Component } from "@angular/core";
+import { lastValueFrom } from "rxjs";
 import { RecurrenceService } from "src/app/services/recurrence/recurrence.service";
-import { GroupDataParameters } from "./group-data-form/group-data-form.component";
-import { GroupDataWorkspace } from "./group-data-workspace";
+import { GroupDataParameters, GroupDataWorkspace } from "./group-data.types";
+import { DEFAULT_GROUP_DATA_WORKSPACE } from "./group-data.defaults";
 
 @Component({
   selector: "app-group-data",
@@ -12,12 +12,12 @@ import { GroupDataWorkspace } from "./group-data-workspace";
 export class GroupDataComponent {
   error: any = null;
   loading: boolean = false;
-  workspace: GroupDataWorkspace = new GroupDataWorkspace();
+  workspace: GroupDataWorkspace = DEFAULT_GROUP_DATA_WORKSPACE;
 
   constructor(private recurrenceRiskService: RecurrenceService) {}
 
   handleReset() {
-    this.workspace = new GroupDataWorkspace();
+    this.workspace = DEFAULT_GROUP_DATA_WORKSPACE;
     this.error = null;
     this.loading = false;
   }
@@ -28,7 +28,7 @@ export class GroupDataComponent {
       this.loading = true;
       const response$ = this.recurrenceRiskService.getRiskFromGroupData(parameters);
       const results = await lastValueFrom(response$);
-      this.workspace = new GroupDataWorkspace(parameters, results);
+      this.workspace = { parameters, results };
     } catch (e) {
       this.error = e;
       console.error(e);

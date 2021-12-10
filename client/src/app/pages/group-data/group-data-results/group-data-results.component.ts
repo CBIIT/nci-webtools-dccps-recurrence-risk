@@ -1,14 +1,15 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from "@angular/core";
+import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { Header } from "src/app/components/table/table.component";
 import { FileService } from "src/app/services/file/file.service";
-import { GroupDataWorkspace } from "../group-data-workspace";
+import { DEFAULT_GROUP_DATA_WORKSPACE } from "../group-data.defaults";
+import { GroupDataWorkspace } from "../group-data.types";
 
 @Component({
   selector: "app-group-data-results",
   templateUrl: "./group-data-results.component.html",
   styleUrls: ["./group-data-results.component.scss"],
 })
-export class GroupDataResultsComponent implements OnInit, OnChanges {
+export class GroupDataResultsComponent implements OnChanges {
   readonly defaultHeaders: Header[] = [
     { key: "followup", title: "followup" },
     { key: "link", title: "link" },
@@ -31,14 +32,10 @@ export class GroupDataResultsComponent implements OnInit, OnChanges {
     { key: "obs_dist_surv", title: "obs_dist_surv" },
   ];
 
-  @Input() workspace: GroupDataWorkspace;
+  @Input() workspace: GroupDataWorkspace = DEFAULT_GROUP_DATA_WORKSPACE;
   headers: Header[] = this.defaultHeaders;
 
-  constructor(private fileService: FileService) {
-    this.workspace = new GroupDataWorkspace();
-  }
-
-  ngOnInit(): void {}
+  constructor(private fileService: FileService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.workspace) {
@@ -75,7 +72,7 @@ export class GroupDataResultsComponent implements OnInit, OnChanges {
       const fileNamePrefix = parameters.seerStatDataFileNames[0].replace(/\.[^\.]+$/, "");
       const timestamp = this.getTimestamp();
       const fileName = `${fileNamePrefix}_${timestamp}.recurrisk_group_data_workspace`;
-      const fileContents = this.workspace.exportToString();
+      const fileContents = JSON.stringify(this.workspace);
       this.fileService.downloadText(fileContents, fileName);
     }
   }
