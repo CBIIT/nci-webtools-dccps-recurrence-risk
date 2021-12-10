@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from "@angular/core";
-import { Header, Row } from "src/app/components/table/table.component";
+import { Header } from "src/app/components/table/table.component";
 import { FileService } from "src/app/services/file/file.service";
+import { GroupDataWorkspace } from "../group-data-workspace";
 
 @Component({
   selector: "app-group-data-results",
@@ -30,44 +31,51 @@ export class GroupDataResultsComponent implements OnInit, OnChanges {
     { key: "obs_dist_surv", title: "obs_dist_surv" },
   ];
 
-  @Input() results: Row[] = [];
-  @Input() parameters: any = {};
-
+  @Input() workspace: GroupDataWorkspace;
   headers: Header[] = this.defaultHeaders;
 
-  constructor(private fileService: FileService) {}
+  constructor(private fileService: FileService) {
+    this.workspace = new GroupDataWorkspace();
+  }
 
   ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.results && this.results.length > 0) {
-      this.headers = Object.keys(this.results[0]).map((name) => ({
+    if (changes.workspace) {
+      this.headers = this.getResultsHeaders(changes.workspace.currentValue);
+    }
+  }
+
+  getResultsHeaders(workspace: GroupDataWorkspace) {
+    if (workspace.results.length === 0) {
+      return this.defaultHeaders;
+    } else {
+      return Object.keys(workspace.results[0]).map((name) => ({
         key: name,
         title: name,
       }));
-    } else {
-      this.headers = this.defaultHeaders;
     }
   }
 
   downloadResults() {
-    if (this.parameters && this.results?.length) {
-      const fileNamePrefix = this.parameters.seerStatFileName || "seer_stat";
+    const { parameters, results } = this.workspace;
+
+    if (parameters.seerStatDataFileNames.length && results.length) {
+      const fileNamePrefix = parameters.seerStatDataFileNames[0].replace(/\.[^\.]+$/, "");
       const timestamp = this.getTimestamp();
       const fileName = `${fileNamePrefix}_results_${timestamp}.csv`;
-      this.fileService.downloadCsv(this.results, fileName);
+      this.fileService.downloadCsv(results, fileName);
     }
   }
 
   downloadWorkspace() {
-    if (this.parameters && this.parameters.seerStatFileName) {
-      const fileNamePrefix = this.parameters.seerStatFileName || "seer_stat";
+    const { parameters, results } = this.workspace;
+
+    if (parameters.seerStatDataFileNames.length && results.length) {
+      const fileNamePrefix = parameters.seerStatDataFileNames[0].replace(/\.[^\.]+$/, "");
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_workspace_${timestamp}.json`;
-      const fileContents = JSON.stringify({
-        parameters: this.parameters,
-        results: this.results,
-      });
+      const fileName = `${fileNamePrefix}_${timestamp}.recurrisk_group_data_workspace`;
+      const fileContents = this.workspace.exportToString();
       this.fileService.downloadText(fileContents, fileName);
     }
   }
