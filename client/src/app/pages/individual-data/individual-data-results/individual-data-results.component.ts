@@ -1,13 +1,15 @@
-import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
-import { Header, Row } from "src/app/components/table/table.component";
+import { Component, Input, SimpleChanges } from "@angular/core";
+import { Header } from "src/app/components/table/table.component";
 import { FileService } from "src/app/services/file/file.service";
+import { DEFAULT_INDIVIDUAL_DATA_WORKSPACE } from "../individual-data.defaults";
+import { IndividualDataWorkspace } from "../individual-data.types";
 
 @Component({
   selector: "app-individual-data-results",
   templateUrl: "./individual-data-results.component.html",
   styleUrls: ["./individual-data-results.component.scss"],
 })
-export class IndividualDataResultsComponent implements OnInit {
+export class IndividualDataResultsComponent {
   readonly defaultHeaders: Header[] = [
     { key: "followup", title: "followup" },
     { key: "link", title: "link" },
@@ -30,43 +32,47 @@ export class IndividualDataResultsComponent implements OnInit {
     { key: "obs_dist_surv", title: "obs_dist_surv" },
   ];
 
-  @Input() results: Row[] = [];
-  @Input() parameters: any = {};
+  @Input() workspace: IndividualDataWorkspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
   headers: Header[] = this.defaultHeaders;
 
   constructor(private fileService: FileService) {}
 
-  ngOnInit(): void {}
-
   ngOnChanges(changes: SimpleChanges) {
-    if (this.results && this.results.length > 0) {
-      this.headers = Object.keys(this.results[0]).map((name) => ({
+    if (changes.workspace) {
+      this.headers = this.getResultsHeaders(changes.workspace.currentValue);
+    }
+  }
+
+  getResultsHeaders(workspace: IndividualDataWorkspace) {
+    if (workspace.results.length === 0) {
+      return this.defaultHeaders;
+    } else {
+      return Object.keys(workspace.results[0]).map((name) => ({
         key: name,
         title: name,
       }));
-    } else {
-      this.headers = this.defaultHeaders;
     }
   }
 
   downloadResults() {
-    if (this.parameters && this.results?.length) {
-      const fileNamePrefix = this.parameters.individualDataFileName || "individual_data";
+    const { parameters, results } = this.workspace;
+
+    if (parameters && results?.length) {
+      const fileNamePrefix = parameters.individualDataFileName || "individual_data";
       const timestamp = this.getTimestamp();
       const fileName = `${fileNamePrefix}_results_${timestamp}.csv`;
-      this.fileService.downloadCsv(this.results, fileName);
+      this.fileService.downloadCsv(results, fileName);
     }
   }
 
   downloadWorkspace() {
-    if (this.parameters && this.results?.length) {
-      const fileNamePrefix = this.parameters.individualDataFileName || "individual_data";
+    const { parameters, results } = this.workspace;
+
+    if (parameters && results?.length) {
+      const fileNamePrefix = parameters.individualDataFileName || "individual_data";
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_workspace_${timestamp}.json`;
-      const fileContents = JSON.stringify({
-        parameters: this.parameters,
-        results: this.results,
-      });
+      const fileName = `${fileNamePrefix}_workspace_${timestamp}.recurrisk_individual_data_workspace`;
+      const fileContents = JSON.stringify(this.workspace);
       this.fileService.downloadText(fileContents, fileName);
     }
   }
