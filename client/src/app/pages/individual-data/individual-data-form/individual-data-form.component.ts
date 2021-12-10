@@ -4,6 +4,7 @@ import { DataFrameHeader, FileService } from "src/app/services/file/file.service
 import { SelectOption } from "src/app/components/multiselect/multiselect.component";
 import { IndividualDataParameters, IndividualDataWorkspace } from "../individual-data.types";
 import { DEFAULT_INDIVIDUAL_DATA_PARAMETERS as defaults } from "../individual-data.defaults";
+import { Row } from "src/app/components/table/table.component";
 
 @Component({
   selector: "app-individual-data-form",
@@ -15,6 +16,8 @@ export class IndividualDataFormComponent implements OnInit {
   @Output() submit = new EventEmitter<IndividualDataParameters>();
   @Output() reset = new EventEmitter<void>();
   form = new FormGroup({
+    inputFileType: new FormControl("individualDataFile", [Validators.required]),
+    workspaceDataFile: new FormControl(null),
     individualDataFile: new FormControl(null, [Validators.required]),
     individualData: new FormControl(defaults.individualData, [Validators.required]),
     individualDataFileName: new FormControl(defaults.individualDataFileName, [Validators.required]),
@@ -43,12 +46,14 @@ export class IndividualDataFormComponent implements OnInit {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleFormValueChange = this.handleFormValueChange.bind(this);
     this.handleIndividualDataFileChange = this.handleIndividualDataFileChange.bind(this);
+    this.handleWorkspaceDataFileChange = this.handleWorkspaceDataFileChange.bind(this);
     this.handleTimeVariableChange = this.handleTimeVariableChange.bind(this);
   }
 
   ngOnInit(): void {
     this.form.valueChanges.subscribe(this.handleFormValueChange);
     this.form.controls.individualDataFile.valueChanges.subscribe(this.handleIndividualDataFileChange);
+    this.form.controls.workspaceDataFile.valueChanges.subscribe(this.handleWorkspaceDataFileChange);
     this.form.controls.timeVariable.valueChanges.subscribe(this.handleTimeVariableChange);
   }
 
@@ -59,7 +64,9 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.form.reset({
+      inputFileType: "individualDataFile",
       individualDataFile: null,
+      workspaceDataFile: null,
       ...defaults,
     });
 
@@ -75,7 +82,7 @@ export class IndividualDataFormComponent implements OnInit {
 
     this.form.markAllAsTouched();
 
-    if (this.form.invalid) {
+    if (this.form.errors) {
       return false;
     }
 
@@ -110,6 +117,30 @@ export class IndividualDataFormComponent implements OnInit {
     }
   }
 
+  /**
+   * Sets validators for input files based on selected file type
+   * @param inputFileType
+   */
+  handleInputFileTypeChange(inputFileType: string) {
+    const { workspaceDataFile, individualDataFile } = this.form.controls;
+
+    this.form.patchValue({
+      workspaceDataFile: null,
+      individualDataFile: null,
+    });
+
+    if (inputFileType === "individualDataFile") {
+      workspaceDataFile.clearValidators();
+      individualDataFile.setValidators([Validators.required]);
+    } else if (inputFileType === "workspaceFile") {
+      workspaceDataFile.setValidators([Validators.required]);
+      individualDataFile.clearValidators();
+    }
+
+    workspaceDataFile.updateValueAndValidity();
+    individualDataFile.updateValueAndValidity();
+  }
+
   async handleIndividualDataFileChange(fileList: FileList) {
     if (fileList?.length) {
       try {
@@ -129,6 +160,28 @@ export class IndividualDataFormComponent implements OnInit {
       }
     } else {
       this.form.patchValue(defaults);
+    }
+  }
+
+  /**
+   * Recreates workspace from input file and populates form with data
+   * @param fileList
+   */
+  async handleWorkspaceDataFileChange(fileList: FileList) {
+    if (fileList?.length) {
+      try {
+        const workspaceDataFile = fileList[0];
+        const workspaceData = await this.fileService.parseJsonFile(workspaceDataFile);
+        const parameters = workspaceData.parameters as IndividualDataParameters;
+        const results = workspaceData.results as Row[];
+        const workspace = { parameters, results };
+        console.log({ workspace });
+
+        this.form.patchValue(parameters);
+        this.loadWorkspace.emit(workspace);
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 

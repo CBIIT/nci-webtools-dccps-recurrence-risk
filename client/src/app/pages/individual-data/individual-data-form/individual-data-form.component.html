@@ -5,6 +5,67 @@
 <form [formGroup]="form" (submit)="handleSubmit($event)" (reset)="handleReset($event)">
   <div class="mb-4">
     <div class="d-flex align-items-baseline">
+      <label class="form-label required">Input File Type</label>
+    </div>
+
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="inputFileType"
+        id="inputFileType-individualDataFile"
+        formControlName="inputFileType"
+        value="individualDataFile"
+      />
+      <label class="form-check-label" for="inputFileType-individualDataFile">Individual Data File</label>
+    </div>
+
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="inputFileType"
+        id="inputFileType-workspaceFile"
+        formControlName="inputFileType"
+        value="workspaceFile"
+      />
+      <label class="form-check-label" for="inputFileType-workspaceFile">Workspace File</label>
+    </div>
+
+    <div
+      *ngIf="form.controls.inputFileType?.touched && form.controls.workspaceDataFile?.invalid"
+      class="invalid-feedback"
+    >
+      <div *ngIf="form.controls.inputFileType?.errors?.required">This field is required.</div>
+    </div>
+  </div>
+
+  <div class="mb-4" *ngIf="form.value.inputFileType === 'workspaceFile'">
+    <div class="d-flex align-items-baseline">
+      <label for="workspaceDataFile" class="form-label required">Workspace File</label>
+    </div>
+    <input
+      class="form-control"
+      [ngClass]="{
+        'is-invalid': form.controls.workspaceDataFile?.touched && form.controls.workspaceDataFile?.invalid
+      }"
+      type="file"
+      name="workspaceDataFile"
+      id="workspaceDataFile"
+      formControlName="workspaceDataFile"
+      accept=".recurrisk_individual_data_workspace"
+      required
+    />
+    <div
+      *ngIf="form.controls.workspaceDataFile?.touched && form.controls.workspaceDataFile?.invalid"
+      class="invalid-feedback"
+    >
+      <div *ngIf="form.controls.workspaceDataFile?.errors?.required">This field is required.</div>
+    </div>
+  </div>
+
+  <div class="mb-4" *ngIf="form.value.inputFileType === 'individualDataFile'">
+    <div class="d-flex align-items-baseline">
       <label for="individualDataFile" class="form-label required">Individual Data File (.csv)</label>
       <a href="assets/files/recurrence_risk_individualdata.csv" target="_blank" class="ms-auto small" download>
         sample
