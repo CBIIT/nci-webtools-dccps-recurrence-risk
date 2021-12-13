@@ -163,10 +163,7 @@
       required
     >
       <option value="0" hidden *ngIf="!form.controls.stageVariable.value">No distant stage value selected</option>
-      <option
-        *ngFor="let option of getFactors(form.value.seerStatDictionary, form.value.stageVariable)"
-        [value]="option.value"
-      >
+      <option *ngFor="let option of getHeaderByName(form.value.stageVariable)?.factors" [value]="option.value">
         {{ option.value }} - {{ option.label }}
       </option>
     </select>

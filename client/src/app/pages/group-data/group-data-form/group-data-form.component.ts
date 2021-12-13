@@ -82,7 +82,7 @@ export class GroupDataFormComponent implements OnInit {
 
     this.form.markAllAsTouched();
 
-    if (this.form.invalid) {
+    if (this.form.errors) {
       return false;
     }
 
@@ -145,6 +145,7 @@ export class GroupDataFormComponent implements OnInit {
         this.loadWorkspace.emit(workspace);
       } catch (error) {
         console.error(error);
+        this.handleReset();
       }
     }
   }
@@ -220,14 +221,8 @@ export class GroupDataFormComponent implements OnInit {
     this.form.patchValue({ distantStageValue: defaults.distantStageValue });
   }
 
-  /**
-   * Retrieves all factors for a given DataFrame header
-   * @param headers
-   * @param name
-   * @returns
-   */
-  getFactors(headers: DataFrameHeader[], name: string) {
-    return headers?.find((header) => header.name === name)?.factors || [];
+  getHeaderByName(name: string): DataFrameHeader {
+    return this.form.controls.seerStatDictionary.value?.find((header: DataFrameHeader) => header.name === name);
   }
 
   /**
