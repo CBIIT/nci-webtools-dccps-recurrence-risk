@@ -81,6 +81,7 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.form.markAllAsTouched();
+    console.log(this.form);
 
     if (this.form.errors) {
       return false;
@@ -175,60 +176,82 @@ export class IndividualDataFormComponent implements OnInit {
         const parameters = workspaceData.parameters as IndividualDataParameters;
         const results = workspaceData.results as Row[];
         const workspace = { parameters, results };
-        console.log({ workspace });
-
         this.form.patchValue(parameters);
         this.loadWorkspace.emit(workspace);
       } catch (error) {
         console.error(error);
+        this.handleReset();
       }
     }
   }
 
   handleTimeVariableChange(timeVariable: string) {
-    const timeVariableHeader: DataFrameHeader = this.getHeaderByName(timeVariable);
-    const maxFollowUpYears = this.getMaxFactorValue(timeVariableHeader) || defaults.followUpYears;
+    const maxFollowUpYears = this.getMaxFollowUpYears(timeVariable) || defaults.followUpYears;
     const followUpYears = Math.min(maxFollowUpYears, defaults.followUpYears);
     this.form.patchValue({ followUpYears });
   }
 
+  /**
+   * Determines if a particular header variable is already in use by a different control
+   * @param headerName
+   * @param formControlName
+   * @returns
+   */
   isDisabled(headerName: string, formControlName: string) {
-    const controls = ["strata", "covariates", "timeVariable", "eventVariable"];
-    const headers = this.form.value.individualDataHeaders?.map((header: DataFrameHeader) => header.name);
-    const headerControls =
-      headers?.reduce((headerControls: any, header: string) => {
-        for (const controlName of controls) {
-          if (this.form.value[controlName].includes(header)) {
-            headerControls[header] = controlName;
-          }
-        }
-        return headerControls;
-      }, {}) || {};
-
-    return Boolean(headerControls[headerName] && headerControls[headerName] !== formControlName);
+    const mutuallyExclusiveControls = ["strata", "covariates", "timeVariable", "eventVariable"];
+    const controlName = mutuallyExclusiveControls.find((name) => this.form.value[name].includes(headerName));
+    return Boolean(controlName && controlName !== formControlName);
   }
 
   shouldQueue(formValue: any) {
     return formValue?.strata?.length > 2 || formValue?.covariates.length > 0;
   }
 
-  getOptions(headers: DataFrameHeader[], formControlName: string): SelectOption[] {
-    return headers.map((header) => ({
+  getIndividualDataHeaders(): DataFrameHeader[] {
+    return this.form.controls.individualDataHeaders?.value || [];
+  }
+
+  /**
+   * Retrieves available options for a particular header
+   * @param headers
+   * @param formControlName
+   * @returns
+   */
+  getOptions(formControlName: string): SelectOption[] {
+    return this.getIndividualDataHeaders().map((header: DataFrameHeader) => ({
       value: header.name,
       label: header.name,
       disabled: this.isDisabled(header.name, formControlName),
     }));
   }
 
-  getHeaderByName(name: string): DataFrameHeader {
-    return this.form.controls.individualDataHeaders.value?.find((header: DataFrameHeader) => header.name === name);
+  /**
+   * Retrieves a header by its name
+   * @param name
+   * @returns
+   */
+  getHeaderByName(name: string) {
+    return this.getIndividualDataHeaders().find((header: DataFrameHeader) => header.name === name);
   }
 
-  getFactors(headers: DataFrameHeader[], name: string) {
-    return headers?.find((header) => header.name === name)?.factors || [];
-  }
+  /**
+   * Retrieves the maximum number of follow-up years based on the time variable
+   * @param timeVariable
+   * @returns
+   */
+  getMaxFollowUpYears(timeVariable: string) {
+    // determine the maximum number of followup years
+    const timeVariableHeader = this.getHeaderByName(timeVariable);
+    let maxFollowUpYears = 0;
 
-  getMaxFactorValue(header?: DataFrameHeader) {
-    return header?.factors?.map((factor) => Number(factor.value)).reduce((max, value) => Math.max(max, value));
+    if (timeVariableHeader) {
+      // reduce is slower than a plain loop
+      for (const factor of timeVariableHeader?.factors || []) {
+        const factorValue = Number(factor.value) || 0;
+        maxFollowUpYears = Math.max(factorValue, maxFollowUpYears);
+      }
+    }
+
+    return maxFollowUpYears;
   }
 }

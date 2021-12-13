@@ -96,12 +96,7 @@
   <div class="mb-4">
     <label for="strata" class="form-label">Strata</label>
 
-    <app-multiselect
-      controlId="strata"
-      name="strata"
-      [options]="getOptions(form.value.individualDataHeaders, 'strata')"
-      formControlName="strata"
-    >
+    <app-multiselect controlId="strata" name="strata" [options]="getOptions('strata')" formControlName="strata">
       <ng-container [ngPlural]="form.value?.strata?.length">
         <ng-template ngPluralCase="=0">No strata selected</ng-template>
         <ng-template ngPluralCase="other">
@@ -121,7 +116,7 @@
     <app-multiselect
       controlId="covariates"
       name="covariates"
-      [options]="getOptions(form.value.individualDataHeaders, 'covariates')"
+      [options]="getOptions('covariates')"
       formControlName="covariates"
     >
       <ng-container [ngPlural]="form.value?.covariates?.length">
