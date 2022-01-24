@@ -11,6 +11,7 @@ import { IndividualDataParameters, IndividualDataWorkspace } from "./individual-
   styleUrls: ["./individual-data.component.scss"],
 })
 export class IndividualDataComponent implements OnInit {
+  activeNavId: string = "results";
   workspace: IndividualDataWorkspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
   error: any = null;
   loading: boolean = false;
@@ -23,6 +24,7 @@ export class IndividualDataComponent implements OnInit {
   }
 
   handleReset() {
+    this.activeNavId = "results";
     this.workspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
     this.error = null;
     this.loading = false;
@@ -39,7 +41,7 @@ export class IndividualDataComponent implements OnInit {
       if (parameters.queue) {
         this.alerts.push({
           type: "primary",
-          message: "Your calculation parameters have been enqueued.",
+          message: "Your request has been enqueued. Results will be sent to the specified email once available.",
         });
         this.workspace = { parameters, results: [] };
       } else {
@@ -50,7 +52,8 @@ export class IndividualDataComponent implements OnInit {
       this.error = e;
       this.alerts.push({
         type: "danger",
-        message: e,
+        message:
+          "Your request could not be processed due to an internal error. Please contact the website administrator if this problem persists.",
       });
     } finally {
       this.loading = false;

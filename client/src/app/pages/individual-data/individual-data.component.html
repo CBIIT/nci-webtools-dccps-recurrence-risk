@@ -16,8 +16,8 @@
 
     <div class="col-md-8">
       <div class="shadow mb-4">
-        <ul ngbNav #nav="ngbNav" [roles]="false" class="nav-tabs">
-          <li ngbNavItem>
+        <ul ngbNav #nav="ngbNav" [roles]="false" [(activeId)]="activeNavId" class="nav-tabs">
+          <li ngbNavItem="results">
             <a ngbNavLink>Results</a>
             <ng-template ngbNavContent>
               <p *ngFor="let alert of alerts">
@@ -28,7 +28,7 @@
               <app-individual-data-results [workspace]="workspace"></app-individual-data-results>
             </ng-template>
           </li>
-          <li ngbNavItem>
+          <li ngbNavItem="help">
             <a ngbNavLink>Help</a>
             <ng-template ngbNavContent>
               <app-individual-data-help></app-individual-data-help>
