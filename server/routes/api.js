@@ -1,8 +1,9 @@
 import { Router, json } from "express";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { withAsync } from "../services/middleware.js";
 import { enqueue } from "../services/queue.js";
 import { recurrence } from "../services/recurrence.js";
-const { SQS_QUEUE_NAME, S3_BUCKET, S3_INPUT_KEY_PREFIX } = process.env;
+const { SQS_QUEUE_NAME, S3_BUCKET, S3_INPUT_KEY_PREFIX, S3_OUTPUT_KEY_PREFIX } = process.env;
 
 export const api = Router();
 
@@ -51,5 +52,26 @@ api.post(
         ),
       );
     }
+  }),
+);
+
+api.get(
+  "/risk/individual-data/:id",
+  withAsync(async ({ params }, response) => {
+    if (!params.id) throw new Error("Please provide a valid id.");
+
+    const s3 = new S3Client();
+    const s3Response = await s3.send(
+      new GetObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: `${S3_OUTPUT_KEY_PREFIX}${params.id}.json`,
+      }),
+    );
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    for await (const chunk of s3Response.Body) {
+      response.write(chunk);
+    }
+    response.end();
   }),
 );
