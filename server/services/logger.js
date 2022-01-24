@@ -1,26 +1,25 @@
-const path = require("path");
-const util = require("util");
-const fs = require("fs");
-const { createLogger, format, transports, info } = require("winston");
-const logConfig = require("../config.json").logs;
-require("winston-daily-rotate-file");
+import path from "path";
+import util from "util";
+import fs from "fs";
+import { createLogger, format, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+const { LOG_LEVEL, LOG_FOLDER } = process.env;
 
-function getLogger(name, config = logConfig) {
-  const { folder, level } = config;
-  fs.mkdirSync(folder, { recursive: true });
-
-  return new createLogger({
-    level: level || "info",
-    format: format.combine(
-      format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-      format.label({ label: name }),
-      format.printf(({ label, timestamp, level, message }) =>
-        [[label, process.pid, timestamp, level].map((s) => `[${s}]`).join(" "), util.format(message)].join(" - "),
-      ),
+export function getLogger(name, level = LOG_LEVEL, folder = LOG_FOLDER) {
+  let logFormat = format.combine(
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    format.label({ label: name }),
+    format.printf(({ label, timestamp, level, message }) =>
+      [[label, process.pid, timestamp, level].map((s) => `[${s}]`).join(" "), util.format(message)].join(" - "),
     ),
-    transports: [
-      new transports.Console(),
-      new transports.DailyRotateFile({
+  );
+
+  let logTransports = [new transports.Console()];
+
+  if (folder) {
+    fs.mkdirSync(folder, { recursive: true });
+    logTransports.push(
+      new DailyRotateFile({
         filename: path.resolve(folder, `${name}-%DATE%.log`),
         datePattern: "YYYY-MM-DD-HH",
         zippedArchive: false,
@@ -29,9 +28,13 @@ function getLogger(name, config = logConfig) {
         maxFiles: "1d",
         prepend: true,
       }),
-    ],
+    );
+  }
+
+  return new createLogger({
+    level: level || "info",
+    format: logFormat,
+    transports: logTransports,
     exitOnError: false,
   });
 }
-
-module.exports = getLogger;
