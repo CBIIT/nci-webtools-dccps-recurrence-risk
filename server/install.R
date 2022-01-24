@@ -6,9 +6,5 @@ install.packages(
   repos = "https://cloud.r-project.org/"
 )
 
-remotes::install_github(
-  c(
-    "cran/SEER2R", 
-    "cran/RecurRisk"
-  )
-)
+remotes::install_github("cran/SEER2R", ref="1.0")
+remotes::install_github("cran/RecurRisk", ref="1.0.2")
