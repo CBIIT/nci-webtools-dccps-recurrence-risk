@@ -10,16 +10,20 @@ import { DEFAULT_GROUP_DATA_WORKSPACE } from "./group-data.defaults";
   styleUrls: ["./group-data.component.scss"],
 })
 export class GroupDataComponent {
+  activeNavId: string = "results";
   error: any = null;
   loading: boolean = false;
   workspace: GroupDataWorkspace = DEFAULT_GROUP_DATA_WORKSPACE;
+  alerts: any[] = [];
 
   constructor(private recurrenceRiskService: RecurrenceService) {}
 
   handleReset() {
+    this.activeNavId = "results";
     this.workspace = DEFAULT_GROUP_DATA_WORKSPACE;
     this.error = null;
     this.loading = false;
+    this.alerts = [];
   }
 
   async handleSubmit(parameters: GroupDataParameters) {
@@ -31,6 +35,11 @@ export class GroupDataComponent {
       this.workspace = { parameters, results };
     } catch (e) {
       this.error = e;
+      this.alerts.push({
+        type: "danger",
+        message:
+          "Your request could not be processed due to an internal error. Please contact the website administrator if this problem persists.",
+      });
       console.error(e);
     } finally {
       this.loading = false;
