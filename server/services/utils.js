@@ -1,16 +1,15 @@
+import fsp from "fs/promises";
+import template from "lodash/template.js";
+
 /**
- * Passes async errors to error-handling middleware
- * @param {function} fn - An asynchronous middleware function
- * @returns The middleware function decorated with an error handler
+ * Renders a template file using the provided parameters
+ * @param {string} filepath
+ * @param {object} params
+ * @returns
  */
-function withAsync(fn) {
-  return async (request, response, next) => {
-    try {
-      return await fn(request, response, next);
-    } catch (error) {
-      next(error);
-    }
-  };
+export async function renderTemplate(filepath, params) {
+  const templateString = await fsp.readFile(filepath, "utf8");
+  return template(templateString)(params);
 }
 
 /**
@@ -22,7 +21,7 @@ function withAsync(fn) {
  * @param config
  * @returns
  */
-function stringifyCsv(data, config) {
+export function stringifyCsv(data, config) {
   const defaultConfig = {
     delimiter: ",",
     newline: "\r\n",
@@ -53,8 +52,3 @@ function stringifyCsv(data, config) {
 
   return rows.join(newline);
 }
-
-module.exports = {
-  stringifyCsv,
-  withAsync,
-};
