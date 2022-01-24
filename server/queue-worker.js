@@ -1,58 +1,32 @@
-const fsp = require("fs/promises");
-const AWS = require("aws-sdk");
-const { template } = require("lodash");
-const { createTransport } = require("nodemailer");
-const getLogger = require("./services/logger");
-const { processMessages } = require("./services/queue");
-const { stringifyCsv } = require("./services/utils");
-const recurrence = require("./services/recurrence");
-const logger = getLogger("recurrence-risk-queue");
-const config = require("./config.json");
+import { getLogger } from "./services/logger.js";
+import { getSmtpTransport } from "./services/email.js";
+import { processMessages } from "./services/queue.js";
+import { renderTemplate, stringifyCsv } from "./services/utils.js";
+import { recurrence } from "./services/recurrence.js";
 
-AWS.config.update(config.aws);
+const logger = getLogger("recurrence-risk-queue");
+const { SQS_QUEUE_NAME, SQS_VISIBILITY_TIMEOUT, SQS_POLL_INTERVAL, EMAIL_ADMINS, EMAIL_SENDER } = process.env;
 
 processMessages({
-  ...config.sqs,
+  queueName: SQS_QUEUE_NAME,
+  visibilityTimeout: SQS_VISIBILITY_TIMEOUT,
+  pollInterval: SQS_POLL_INTERVAL,
   messageHandler: async (message) => {
-    console.log(message);
-    const transport = createTransport(config.email.smtp);
-    const s3 = new AWS.S3();
-    let input = {};
+    const mailer = getSmtpTransport(process.env);
 
     try {
-      logger.info("Received message", message);
-      const { bucket, key } = JSON.parse(message.Body);
-
-      // receive and delete original message
-      const { Body: inputJSON } = await s3
-        .getObject({
-          Bucket: bucket,
-          Key: key,
-        })
-        .promise();
-
-      await s3
-        .deleteObject({
-          Bucket: bucket,
-          Key: key,
-        })
-        .promise();
-
-      logger.info("Retrieved and deleted parameters from s3", { bucket, key });
-      input = JSON.parse(inputJSON);
-      const { version, functionName, params } = input;
+      logger.info("Retrieved message from SQS queue");
+      const { version, functionName, params } = message;
       const start = new Date().getTime();
       const results = await recurrence[version][functionName](params);
       const duration = new Date().getTime() - start;
       logger.info(`Finished calculation in ${duration / 1000}s, sending results`);
 
-      const userSuccessEmailTemplate = template(await fsp.readFile("templates/user-success-email.html", "utf-8"));
-
-      await transport.sendMail({
-        from: config.email.sender,
+      await mailer.sendMail({
+        from: EMAIL_SENDER,
         to: params.email,
         subject: "Recurrence Risk Tool Results",
-        html: userSuccessEmailTemplate(params),
+        html: await renderTemplate("templates/user-success-email.html", params),
         attachments: [
           {
             filename: "results.csv",
@@ -63,28 +37,28 @@ processMessages({
 
       logger.info(`Sent results email to: ${params.email}`);
     } catch (exception) {
-      const adminFailureEmailTemplate = template(await fsp.readFile("templates/admin-failure-email.html", "utf-8"));
-      const userFailureEmailTemplate = template(await fsp.readFile("templates/user-failure-email.html", "utf-8"));
       logger.error(exception);
 
+      const templateParams = {
+        ...input.params,
+        id: message.MessageId,
+        exception,
+      };
+
       await transport.sendMail({
-        from: config.email.sender,
-        to: config.email.admins,
+        from: EMAIL_SENDER,
+        to: EMAIL_ADMINS,
         subject: "Recurrence Risk Tool Failure",
-        html: adminFailureEmailTemplate({
-          ...input.params,
-          id: message.MessageId,
-          exception,
-        }),
+        html: await renderTemplate("templates/admin-failure-email.html", templateParams),
       });
 
       if (input.params) {
         // send user failure email only if parameters are available
         await transport.sendMail({
-          from: config.email.sender,
+          from: EMAIL_SENDER,
           to: input.params.email,
           subject: "Recurrence Risk Tool Results",
-          html: userFailureEmailTemplate(input.params),
+          html: await renderTemplate("templates/user-failure-email.html", templateParams),
         });
       }
     }
