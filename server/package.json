@@ -5,7 +5,7 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "install:r": "Rscript install.R",
+    "install:r": "Rscript -e renv::restore()",
     "start": "node -r dotenv/config app.js",
     "start:queue": "node -r dotenv/config queue-worker.js",
     "test": "jest"
