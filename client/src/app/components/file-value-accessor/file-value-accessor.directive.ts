@@ -17,8 +17,21 @@ export class FileValueAccessorDirective implements ControlValueAccessor {
 
   constructor(private elementRef: ElementRef) {}
 
-  writeValue(value: any) {
-    if (!value && this?.elementRef?.nativeElement) this.elementRef.nativeElement.value = "";
+  writeValue(value: FileList | File[] | null) {
+    const fileInput: HTMLInputElement = this?.elementRef?.nativeElement;
+    if (fileInput) {
+      if (!value) {
+        fileInput.value = "";
+      } else if (value instanceof FileList) {
+        fileInput.files = value;
+      } else {
+        const dataTransfer = new DataTransfer();
+        for (const file of value) {
+          dataTransfer.items.add(file);
+        }
+        fileInput.files = dataTransfer.files;
+      }
+    }
   }
 
   registerOnChange(fn: (_: any) => void) {
