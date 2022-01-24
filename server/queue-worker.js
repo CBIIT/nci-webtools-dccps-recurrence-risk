@@ -29,10 +29,10 @@ processMessages({
     try {
       logger.info("Retrieved message from SQS queue");
       const id = randomBytes(16).toString("hex");
-      const { version, functionName, params } = message;
+      const { version, functionName, parameters } = message;
       const start = new Date().getTime();
-      const results = await recurrence[version][functionName](params);
-      const s3Results = JSON.stringify({ params, results });
+      const results = await recurrence[version][functionName](parameters);
+      const s3Results = JSON.stringify({ parameters, results });
       const s3ResultsKey = `${S3_OUTPUT_KEY_PREFIX}${id}.json`;
       const duration = new Date().getTime() - start;
       logger.info(`Finished calculation in ${duration / 1000}s, sending results`);
@@ -46,13 +46,13 @@ processMessages({
       );
 
       const emailParams = {
-        ...params,
+        ...parameters,
         resultsUrl: `${APP_BASE_URL}/#/individual-data/${id}`,
       };
 
       await mailer.sendMail({
         from: EMAIL_SENDER,
-        to: params.email,
+        to: parameters.email,
         subject: "Recurrence Risk Tool Results",
         html: await renderTemplate("templates/user-success-email.html", emailParams),
       });
@@ -62,7 +62,7 @@ processMessages({
       logger.error(exception);
 
       const templateParams = {
-        ...input.params,
+        ...input.parameters,
         id: message.MessageId,
         exception,
       };
@@ -74,11 +74,11 @@ processMessages({
         html: await renderTemplate("templates/admin-failure-email.html", templateParams),
       });
 
-      if (input.params) {
+      if (input.parameters) {
         // send user failure email only if parameters are available
         await transport.sendMail({
           from: EMAIL_SENDER,
-          to: input.params.email,
+          to: input.parameters.email,
           subject: "Recurrence Risk Tool Results",
           html: await renderTemplate("templates/user-failure-email.html", templateParams),
         });

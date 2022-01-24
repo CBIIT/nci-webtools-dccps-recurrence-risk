@@ -44,7 +44,7 @@ api.post(
           {
             version: params.version,
             functionName: "getRiskFromIndividualData",
-            params: {
+            parameters: {
               ...body,
               timestamp: new Date().toISOString(),
             },
