@@ -44,17 +44,20 @@ export class IndividualDataFormComponent implements OnInit {
   constructor(private fileService: FileService) {
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleFormValueChange = this.handleFormValueChange.bind(this);
     this.handleIndividualDataFileChange = this.handleIndividualDataFileChange.bind(this);
     this.handleWorkspaceDataFileChange = this.handleWorkspaceDataFileChange.bind(this);
     this.handleTimeVariableChange = this.handleTimeVariableChange.bind(this);
+    this.handleShouldQueueChange = this.handleShouldQueueChange.bind(this);
+    this.handleQueueChange = this.handleQueueChange.bind(this);
   }
 
   ngOnInit(): void {
-    this.form.valueChanges.subscribe(this.handleFormValueChange);
     this.form.controls.individualDataFile.valueChanges.subscribe(this.handleIndividualDataFileChange);
     this.form.controls.workspaceDataFile.valueChanges.subscribe(this.handleWorkspaceDataFileChange);
     this.form.controls.timeVariable.valueChanges.subscribe(this.handleTimeVariableChange);
+    this.form.controls.strata.valueChanges.subscribe(this.handleShouldQueueChange);
+    this.form.controls.covariates.valueChanges.subscribe(this.handleShouldQueueChange);
+    this.form.controls.queue.valueChanges.subscribe(this.handleQueueChange);
   }
 
   handleReset(event?: Event) {
@@ -81,9 +84,10 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.form.markAllAsTouched();
+    this.form.updateValueAndValidity();
     console.log(this.form);
 
-    if (this.form.errors) {
+    if (this.form.invalid) {
       return false;
     }
 
@@ -107,15 +111,21 @@ export class IndividualDataFormComponent implements OnInit {
     return false;
   }
 
-  handleFormValueChange(formValue: any) {
-    const { queue, email } = this.form.controls;
-
+  handleShouldQueueChange(formValue: any) {
+    const { queue } = this.form.controls;
     if (this.shouldQueue(formValue)) {
-      queue.setValue(true, { emitEvent: false });
+      queue.setValue(true);
+    }
+  }
+
+  handleQueueChange(queue: boolean) {
+    const { email } = this.form.controls;
+    if (queue) {
       email.setValidators([Validators.required, Validators.email]);
     } else {
       email.clearValidators();
     }
+    email.updateValueAndValidity();
   }
 
   /**
@@ -177,7 +187,9 @@ export class IndividualDataFormComponent implements OnInit {
         const results = workspaceData.results as Row[];
         const workspace = { parameters, results };
         this.form.patchValue(parameters);
+        this.form.updateValueAndValidity();
         this.loadWorkspace.emit(workspace);
+        console.log(this.form);
       } catch (error) {
         console.error(error);
         this.handleReset();

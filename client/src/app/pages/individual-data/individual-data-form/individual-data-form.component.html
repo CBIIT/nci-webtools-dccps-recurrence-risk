@@ -319,8 +319,8 @@
     <input type="checkbox" class="form-check-input" id="queue" formControlName="queue" />
     <label class="form-check-label" for="queue" aria-describedby="queueHelp">Use Queue</label>
     <div id="queueHelp" class="form-text">
-      If any covariates or more than two strata are selected, your calculation will be enqueued and results will be sent
-      to the specified email address.
+      If any covariates or more than two strata are selected, your request will be enqueued automatically and results
+      will be sent to the specified email address.
     </div>
   </div>
 
@@ -341,7 +341,8 @@
     </div>
   </div>
   <div class="mb-2">
-    <button type="submit" class="btn btn-primary me-2">Submit</button>
+    <button type="submit" class="btn btn-primary me-2" [disabled]="form.invalid">Submit</button>
     <button type="reset" class="btn btn-outline-danger">Reset</button>
+    <!-- {{ form.invalid ? 'Invalid' : 'Valid'}} -->
   </div>
 </form>
