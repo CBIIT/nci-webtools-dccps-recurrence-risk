@@ -45,7 +45,7 @@ api.post(
             functionName: "getRiskFromIndividualData",
             params: {
               ...body,
-              timestamp: new Date().getTime(),
+              timestamp: new Date().toISOString(),
             },
           },
         ),
