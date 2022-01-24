@@ -7,6 +7,7 @@ import { CustomReuseStrategy } from "./custom-reuse-strategy";
 const routes: Routes = [
   { path: "group-data", component: GroupDataComponent },
   { path: "individual-data", component: IndividualDataComponent },
+  { path: "individual-data/:id", component: IndividualDataComponent },
   { path: "**", redirectTo: "group-data" },
 ];
 
