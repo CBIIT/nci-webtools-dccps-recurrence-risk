@@ -57,28 +57,27 @@ processMessages({
         html: await renderTemplate("templates/user-success-email.html", emailParams),
       });
 
-      logger.info(`Sent results email to: ${params.email}`);
+      logger.info(`Sent results email to: ${message.parameters.email}`);
     } catch (exception) {
       logger.error(exception);
 
       const templateParams = {
-        ...input.parameters,
-        id: message.MessageId,
+        ...message.parameters,
         exception,
       };
 
-      await transport.sendMail({
+      await mailer.sendMail({
         from: EMAIL_SENDER,
         to: EMAIL_ADMINS,
         subject: "Recurrence Risk Tool Failure",
         html: await renderTemplate("templates/admin-failure-email.html", templateParams),
       });
 
-      if (input.parameters) {
+      if (message.parameters) {
         // send user failure email only if parameters are available
-        await transport.sendMail({
+        await mailer.sendMail({
           from: EMAIL_SENDER,
-          to: input.parameters.email,
+          to: message.parameters.email,
           subject: "Recurrence Risk Tool Results",
           html: await renderTemplate("templates/user-failure-email.html", templateParams),
         });
