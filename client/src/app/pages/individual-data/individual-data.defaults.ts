@@ -1,6 +1,7 @@
 import { IndividualDataParameters, IndividualDataWorkspace } from "./individual-data.types";
 
 export const DEFAULT_INDIVIDUAL_DATA_PARAMETERS: IndividualDataParameters = {
+  inputFileType: "individualDataFile",
   workspaceDataFileName: "",
   individualData: [],
   individualDataFileName: "",

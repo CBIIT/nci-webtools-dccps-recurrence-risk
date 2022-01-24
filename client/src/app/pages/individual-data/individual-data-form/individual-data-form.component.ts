@@ -68,7 +68,6 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.form.reset({
-      inputFileType: "individualDataFile",
       individualDataFile: null,
       workspaceDataFile: null,
       ...defaults,
@@ -93,6 +92,7 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.submit.emit({
+      inputFileType: this.form.value.inputFileType,
       workspaceDataFileName: this.form.value.workspaceDataFileName,
       individualData: this.form.value.individualData,
       individualDataFileName: this.form.value.individualDataFileName,
