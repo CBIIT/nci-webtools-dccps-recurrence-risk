@@ -7,7 +7,7 @@ services:
       args:
         BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
     volumes:
-      - ./server/config.json:/app/server/config.json:ro
+      - ./server/.env:/app/server/.env:ro
       - ./server/logs:/app/logs
 
   processor:
@@ -17,9 +17,9 @@ services:
       args:
         BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
     volumes:
-      - ./server/config.json:/app/server/config.json:ro
+      - ./server/.env:/app/server/.env:ro
       - ./server/logs:/app/logs
-    entrypoint: npm run start:queue
+    entrypoint: npm run start:queue-worker
 
   frontend:
     build:
