@@ -38,6 +38,8 @@ export class IndividualDataComponent implements OnInit {
 
   async loadResults(id: string) {
     try {
+      this.handleReset();
+      this.loading = true;
       const response$ = this.recurrenceRiskService.getRiskFromIndividualDataResults(id);
       this.workspace = await lastValueFrom(response$);
     } catch (e) {
@@ -46,6 +48,8 @@ export class IndividualDataComponent implements OnInit {
         type: "danger",
         message: "Your results could not be loaded. Please contact the website administrator if this problem persists.",
       });
+    } finally {
+      this.loading = false;
     }
   }
 
