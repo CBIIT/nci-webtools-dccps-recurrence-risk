@@ -18,6 +18,7 @@ export class IndividualDataFormComponent implements OnInit {
   form = new FormGroup({
     inputFileType: new FormControl("individualDataFile", [Validators.required]),
     workspaceDataFile: new FormControl(null),
+    workspaceDataFileName: new FormControl(defaults.workspaceDataFileName),
     individualDataFile: new FormControl(null, [Validators.required]),
     individualData: new FormControl(defaults.individualData, [Validators.required]),
     individualDataFileName: new FormControl(defaults.individualDataFileName, [Validators.required]),
@@ -92,6 +93,7 @@ export class IndividualDataFormComponent implements OnInit {
     }
 
     this.submit.emit({
+      workspaceDataFileName: this.form.value.workspaceDataFileName,
       individualData: this.form.value.individualData,
       individualDataFileName: this.form.value.individualDataFileName,
       individualDataHeaders: this.form.value.individualDataHeaders,

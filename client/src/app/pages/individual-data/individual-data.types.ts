@@ -2,6 +2,7 @@ import { Row } from "src/app/components/table/table.component";
 import { DataFrameHeader } from "src/app/services/file/file.service";
 
 export type IndividualDataParameters = {
+  workspaceDataFileName: string;
   individualData: Row[];
   individualDataFileName: string;
   individualDataHeaders: DataFrameHeader[];
