@@ -81,8 +81,9 @@ export class GroupDataFormComponent implements OnInit {
     }
 
     this.form.markAllAsTouched();
+    this.form.updateValueAndValidity();
 
-    if (this.form.errors) {
+    if (this.form.invalid) {
       return false;
     }
 
