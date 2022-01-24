@@ -12,24 +12,15 @@ RUN dnf -y update \
     R \
  && dnf clean all
 
-ENV R_REMOTES_NO_ERRORS_FROM_WARNINGS="true"
-
-RUN Rscript -e "install.packages(c(\
-    'jsonlite', \
-    'remotes' \
-), repos='https://cloud.r-project.org/')"
-
-# ensure RecurRisk and dependencies are installed
-RUN Rscript -e "remotes::install_github('cran/SEER2R', ref='1.0')"
-RUN Rscript -e "remotes::install_github('cran/RecurRisk', ref='1.0.2')"
-
-# install updated version of RecurRisk if applicable (do not remove previous RUN step, as that installs dependencies for RecurRisk)
-ARG RECURRISK_R_PACKAGE_TAG=master
-RUN Rscript -e "remotes::install_github('cran/RecurRisk', ref='$RECURRISK_R_PACKAGE_TAG', upgrade='never')"
-
 RUN mkdir -p /app/server
 
 WORKDIR /app/server
+
+RUN Rscript -e "install.packages('renv', repos = 'https://cloud.r-project.org/')"
+
+COPY server/renv.lock /app/server/
+
+RUN Rscript -e "renv::restore()"
 
 COPY server/package.json /app/server/
 
