@@ -9,10 +9,7 @@
   <body>
     Dear Recurrence Risk Administrator,
     <br />
-    <p>
-      An error occured while processing calculation id:
-      <b>{{ id }}</b>
-    </p>
+    <p>An error occured while processing a user request from the queue:</p>
 
     <p><b>Parameters</b></p>
     <ul>
@@ -63,7 +60,7 @@
     </ul>
 
     <p><b>Exception Information</b></p>
-    <pre>{{ exception }}</pre>
+    <pre><%- exception %></pre>
 
     <p>- Recurrence Risk Team</p>
   </body>
