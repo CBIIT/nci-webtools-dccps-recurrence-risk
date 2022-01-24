@@ -1,41 +1,18 @@
-const fs = require("fs");
-const AWS = require("aws-sdk");
-const express = require("express");
-const helmet = require("helmet");
-const getLogger = require("./services/logger");
-const apiRouter = require("./services/api");
-const config = require("./config.json");
-const isProduction = process.env.NODE_ENV === "production";
-
-AWS.config.update(config.aws);
-
+import express from "express";
+import { getLogger } from "./services/logger.js";
+import { api } from "./routes/api.js";
+import { logRequests, logErrors } from "./services/middleware.js";
+const { API_PORT } = process.env;
 const app = express();
 
 // initialize logger
 app.locals.logger = getLogger("recurrence-risk");
 
-// add security headers to all responses
-app.use(
-  helmet({
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true,
-    },
-  }),
-);
+// register middleware
+app.use(logRequests());
+app.use("/api", api);
+app.use(logErrors());
 
-app.use("/api", apiRouter);
-
-// global error handler
-app.use((error, request, response, next) => {
-  const { name, message } = error;
-  request.app.locals.logger.error(error);
-
-  // return less descriptive errors in production
-  response.status(500).json(isProduction ? name : `${name}: ${message}`);
-});
-
-app.listen(config.server.port, () => {
-  app.locals.logger.info(`Application is running on port: ${config.server.port}`);
+app.listen(+API_PORT, () => {
+  app.locals.logger.info(`Application is running on port: ${API_PORT}`);
 });
