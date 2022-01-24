@@ -7,6 +7,7 @@
     <div class="col-md-4">
       <div class="shadow mb-4 p-4">
         <app-individual-data-form
+          [workspace]="workspace"
           (loadWorkspace)="handleLoadWorkspace($event)"
           (submit)="handleSubmit($event)"
           (reset)="handleReset()"

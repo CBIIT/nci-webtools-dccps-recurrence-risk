@@ -1,9 +1,12 @@
-import { Component, OnInit, Output, EventEmitter } from "@angular/core";
+import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { DataFrameHeader, FileService } from "src/app/services/file/file.service";
 import { SelectOption } from "src/app/components/multiselect/multiselect.component";
 import { IndividualDataParameters, IndividualDataWorkspace } from "../individual-data.types";
-import { DEFAULT_INDIVIDUAL_DATA_PARAMETERS as defaults } from "../individual-data.defaults";
+import {
+  DEFAULT_INDIVIDUAL_DATA_PARAMETERS as defaults,
+  DEFAULT_INDIVIDUAL_DATA_WORKSPACE,
+} from "../individual-data.defaults";
 import { Row } from "src/app/components/table/table.component";
 
 @Component({
@@ -11,7 +14,8 @@ import { Row } from "src/app/components/table/table.component";
   templateUrl: "./individual-data-form.component.html",
   styleUrls: ["./individual-data-form.component.scss"],
 })
-export class IndividualDataFormComponent implements OnInit {
+export class IndividualDataFormComponent implements OnInit, OnChanges {
+  @Input() workspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
   @Output() loadWorkspace = new EventEmitter<IndividualDataWorkspace>();
   @Output() submit = new EventEmitter<IndividualDataParameters>();
   @Output() reset = new EventEmitter<void>();
@@ -59,6 +63,28 @@ export class IndividualDataFormComponent implements OnInit {
     this.form.controls.strata.valueChanges.subscribe(this.handleShouldQueueChange);
     this.form.controls.covariates.valueChanges.subscribe(this.handleShouldQueueChange);
     this.form.controls.queue.valueChanges.subscribe(this.handleQueueChange);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.workspace) {
+      const { parameters } = changes.workspace.currentValue as IndividualDataWorkspace;
+
+      try {
+        this.form.patchValue(
+          {
+            ...parameters,
+            individualDataFile: [new File([""], parameters.individualDataFileName)],
+            workspaceDataFile: [new File([""], parameters.workspaceDataFileName)],
+          },
+          { emitEvent: false },
+        );
+        this.form.updateValueAndValidity();
+        console.log(this.form);
+      } catch (error) {
+        console.error(error);
+        this.handleReset();
+      }
+    }
   }
 
   handleReset(event?: Event) {
@@ -188,6 +214,8 @@ export class IndividualDataFormComponent implements OnInit {
         const parameters = workspaceData.parameters as IndividualDataParameters;
         const results = workspaceData.results as Row[];
         const workspace = { parameters, results };
+        parameters.inputFileType = "workspaceFile";
+        parameters.workspaceDataFileName = workspaceDataFile.name;
         this.form.patchValue(parameters);
         this.form.updateValueAndValidity();
         this.loadWorkspace.emit(workspace);

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 import { lastValueFrom } from "rxjs";
-import { Row } from "src/app/components/table/table.component";
 import { RecurrenceService } from "src/app/services/recurrence/recurrence.service";
 import { DEFAULT_INDIVIDUAL_DATA_WORKSPACE } from "./individual-data.defaults";
 import { IndividualDataParameters, IndividualDataWorkspace } from "./individual-data.types";
@@ -17,10 +17,15 @@ export class IndividualDataComponent implements OnInit {
   loading: boolean = false;
   alerts: any[] = [];
 
-  constructor(private recurrenceRiskService: RecurrenceService) {}
+  constructor(private recurrenceRiskService: RecurrenceService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.handleReset();
+    this.route.params.subscribe((params) => {
+      if (params?.id) {
+        this.loadResults(params.id);
+      }
+    });
   }
 
   handleReset() {
@@ -29,6 +34,19 @@ export class IndividualDataComponent implements OnInit {
     this.error = null;
     this.loading = false;
     this.alerts = [];
+  }
+
+  async loadResults(id: string) {
+    try {
+      const response$ = this.recurrenceRiskService.getRiskFromIndividualDataResults(id);
+      this.workspace = await lastValueFrom(response$);
+    } catch (e) {
+      console.log(e);
+      this.alerts.push({
+        type: "danger",
+        message: "Your results could not be loaded. Please contact the website administrator if this problem persists.",
+      });
+    }
   }
 
   async handleSubmit(parameters: IndividualDataParameters) {
