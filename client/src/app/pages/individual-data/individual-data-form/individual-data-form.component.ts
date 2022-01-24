@@ -218,7 +218,7 @@ export class IndividualDataFormComponent implements OnInit {
   }
 
   shouldQueue(formValue: any) {
-    return formValue?.strata?.length > 2 || formValue?.covariates.length > 0;
+    return formValue?.strata?.length > 2 || formValue?.covariates?.length > 0;
   }
 
   getIndividualDataHeaders(): DataFrameHeader[] {
