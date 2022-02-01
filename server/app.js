@@ -13,6 +13,7 @@ app.use(logRequests());
 app.use("/api", api);
 app.use(logErrors());
 
-app.listen(+API_PORT, () => {
+const server = app.listen(+API_PORT, () => {
   app.locals.logger.info(`Application is running on port: ${API_PORT}`);
 });
+server.setTimeout(1000 * 60 * 60);
