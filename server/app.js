@@ -2,7 +2,7 @@ import express from "express";
 import { getLogger } from "./services/logger.js";
 import { api } from "./routes/api.js";
 import { logRequests, logErrors } from "./services/middleware.js";
-const { API_PORT } = process.env;
+const { API_PORT, REQUEST_TIMEOUT_SECONDS } = process.env;
 const app = express();
 
 // initialize logger
@@ -16,4 +16,4 @@ app.use(logErrors());
 const server = app.listen(+API_PORT, () => {
   app.locals.logger.info(`Application is running on port: ${API_PORT}`);
 });
-server.setTimeout(1000 * 60 * 60);
+server.setTimeout(+REQUEST_TIMEOUT_SECONDS * 1000);
