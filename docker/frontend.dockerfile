@@ -1,11 +1,14 @@
-FROM ${FRONTEND_BASE_IMAGE:-quay.io/centos/centos:stream8}
+FROM ${BASE_IMAGE:-public.ecr.aws/amazonlinux/amazonlinux:2}
 
-RUN dnf -y update \
- && dnf -y module enable nodejs:14 \
- && dnf -y install \
+RUN yum -y update \
+ && curl -fsSL https://rpm.nodesource.com/setup_16.x | bash - \
+ && amazon-linux-extras enable httpd_modules \
+ && yum clean metadata \
+ && yum -y install \
     httpd \
     nodejs \
- && dnf clean all
+ && yum clean all
+# gcc-c++ make
 
 RUN mkdir -p /app/client
 

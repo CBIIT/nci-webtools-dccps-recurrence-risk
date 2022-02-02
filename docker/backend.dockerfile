@@ -1,16 +1,17 @@
-FROM ${BACKEND_BASE_IMAGE:-quay.io/centos/centos:stream8}
+FROM ${BASE_IMAGE:-public.ecr.aws/amazonlinux/amazonlinux:2}
 
-RUN dnf -y update \
- && dnf -y install \
-    dnf-plugins-core \
-    epel-release \
-    glibc-langpack-en \
- && dnf config-manager --set-enabled powertools \
- && dnf -y module enable nodejs:16 \
- && dnf -y install \
-    nodejs \
+RUN yum -y update \
+ && curl -fsSL https://rpm.nodesource.com/setup_16.x | bash - \
+ && amazon-linux-extras enable R4 \
+ && yum clean metadata \
+ && yum -y install \
+    java-17-amazon-corretto \
+    java-17-amazon-corretto-devel \
+    nodejs \ 
     R \
- && dnf clean all
+ && yum clean all
+
+RUN R CMD javareconf
 
 RUN mkdir -p /app/server
 
