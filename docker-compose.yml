@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: docker/backend.dockerfile
       args:
-        BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+        BASE_IMAGE: "public.ecr.aws/amazonlinux/amazonlinux:2"
     volumes:
       - ./server/.env:/app/server/.env:ro
       - ./server/logs:/app/logs
@@ -15,7 +15,7 @@ services:
       context: .
       dockerfile: docker/backend.dockerfile
       args:
-        BACKEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+        BASE_IMAGE: "public.ecr.aws/amazonlinux/amazonlinux:2"
     volumes:
       - ./server/.env:/app/server/.env:ro
       - ./server/logs:/app/logs
@@ -26,10 +26,11 @@ services:
       context: .
       dockerfile: docker/frontend.dockerfile
       args:
-        FRONTEND_BASE_IMAGE: "quay.io/centos/centos:stream8"
+        BASE_IMAGE: "public.ecr.aws/amazonlinux/amazonlinux:2"
     environment:
       APP_PATH: /recurrence
       API_BASE_URL: http://backend:8000
+      SERVER_TIMEOUT: 900
     links:
       - backend:backend
     ports:
