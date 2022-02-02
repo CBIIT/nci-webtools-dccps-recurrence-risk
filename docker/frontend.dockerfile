@@ -8,7 +8,6 @@ RUN yum -y update \
     httpd \
     nodejs \
  && yum clean all
-# gcc-c++ make
 
 RUN mkdir -p /app/client
 
