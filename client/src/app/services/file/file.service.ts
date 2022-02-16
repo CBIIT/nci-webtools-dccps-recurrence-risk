@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { parseCsv, stringifyCsv, Record, CsvParseConfig, Value } from "./csv";
 import { saveAs } from "file-saver";
+import { writeFileXLSX, utils as xlsxUtils } from "xlsx";
 
 export type DataFrameHeader = {
   name: string;
@@ -23,6 +24,11 @@ export type IniConfig = {
   [key: string]: {
     [key: string]: string;
   };
+};
+
+export type ExcelSheet = {
+  name: string;
+  data: Record[] | Value[][];
 };
 
 @Injectable({
@@ -210,5 +216,18 @@ export class FileService {
   downloadText(text: string, filename: string) {
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     saveAs(blob, filename);
+  }
+
+  downloadExcel(sheets: ExcelSheet[], filename: string) {
+    const workbook = xlsxUtils.book_new();
+
+    for (const sheet of sheets) {
+      const worksheet = Array.isArray(typeof sheet.data[0])
+        ? xlsxUtils.aoa_to_sheet(sheet.data as Value[][])
+        : xlsxUtils.json_to_sheet(sheet.data as Record[]);
+      xlsxUtils.book_append_sheet(workbook, worksheet, sheet.name);
+    }
+
+    writeFileXLSX(workbook, filename);
   }
 }
