@@ -68,13 +68,18 @@ export class IndividualDataFormComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.workspace) {
       const { parameters } = changes.workspace.currentValue as IndividualDataWorkspace;
+      console.log({ workspace: changes.workspace });
 
       try {
         this.form.patchValue(
           {
             ...parameters,
-            individualDataFile: [new File([""], parameters.individualDataFileName)],
-            workspaceDataFile: [new File([""], parameters.workspaceDataFileName)],
+            individualDataFile: parameters.individualDataFileName
+              ? [new File([""], parameters.individualDataFileName)]
+              : null,
+            workspaceDataFile: parameters.workspaceDataFileName
+              ? [new File([""], parameters.workspaceDataFileName)]
+              : null,
           },
           { emitEvent: false },
         );
