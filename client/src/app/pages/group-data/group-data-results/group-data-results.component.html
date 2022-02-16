@@ -1,7 +1,7 @@
 <div class="table-responsive">
   <app-table [headers]="headers" [data]="workspace.results">
     <div ngbDropdown class="d-inline-block" container="body" placement="bottom-right">
-      <button class="btn btn-outline-primary" id="downloadGroupResultsDropdown" ngbDropdownToggle>Download</button>
+      <button class="btn btn-outline-primary" id="downloadGroupResultsDropdown" ngbDropdownToggle>Export</button>
       <div ngbDropdownMenu aria-labelledby="downloadGroupResultsDropdown">
         <button (click)="downloadResults()" ngbDropdownItem>Results</button>
         <button (click)="downloadWorkspace()" ngbDropdownItem>Workspace</button>

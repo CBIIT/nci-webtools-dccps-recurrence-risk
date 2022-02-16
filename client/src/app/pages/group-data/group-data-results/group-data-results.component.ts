@@ -60,8 +60,27 @@ export class GroupDataResultsComponent implements OnChanges {
     if (parameters.seerStatDataFileNames.length && results.length) {
       const fileNamePrefix = parameters.seerStatDataFileNames[0].replace(/\.[^\.]+$/, "");
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_results_${timestamp}.csv`;
-      this.fileService.downloadCsv(results, fileName);
+      const fileName = `recurrisk_${fileNamePrefix}_group_data_results_${timestamp}.xlsx`;
+      const parameterRows = [
+        {
+          Parameter: "SEER*Stat Dictionary File",
+          Value: parameters.seerStatDataFileNames.find((f) => /\.dic$/i.test(f)) || "",
+        },
+        {
+          Parameter: "SEER*Stat Data File",
+          Value: parameters.seerStatDataFileNames.find((f) => /\.txt$/i.test(f)) || "",
+        },
+        { Parameter: "CanSurv Data File", Value: parameters.canSurvDataFileName },
+        { Parameter: "Stage Variable", Value: parameters.stageVariable },
+        { Parameter: "Distant Stage Value", Value: +parameters.distantStageValue },
+        { Parameter: "Adjustment Factor r", Value: +parameters.adjustmentFactorR },
+        { Parameter: "Years of Follow-up ", Value: +parameters.followUpYears },
+      ];
+      const sheets = [
+        { name: "Parameters", data: parameterRows },
+        { name: "Results", data: results },
+      ];
+      this.fileService.downloadExcel(sheets, fileName);
     }
   }
 
@@ -71,7 +90,7 @@ export class GroupDataResultsComponent implements OnChanges {
     if (parameters.seerStatDataFileNames.length && results.length) {
       const fileNamePrefix = parameters.seerStatDataFileNames[0].replace(/\.[^\.]+$/, "");
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_${timestamp}.recurrisk_group_data_workspace`;
+      const fileName = `recurrisk_${fileNamePrefix}_${timestamp}.group_data_workspace`;
       const fileContents = JSON.stringify(this.workspace);
       this.fileService.downloadText(fileContents, fileName);
     }
