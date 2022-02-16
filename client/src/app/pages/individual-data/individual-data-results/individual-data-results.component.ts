@@ -60,8 +60,24 @@ export class IndividualDataResultsComponent {
     if (parameters && results?.length) {
       const fileNamePrefix = parameters.individualDataFileName || "individual_data";
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_results_${timestamp}.csv`;
-      this.fileService.downloadCsv(results, fileName);
+      const fileName = `recurrisk_${fileNamePrefix}_individual_data_results_${timestamp}.xlsx`;
+      const parameterRows = [
+        { Parameter: "Individual Data File", Value: parameters.individualDataFileName },
+        { Parameter: "Strata", Value: parameters.strata.join(",") },
+        { Parameter: "Covariates", Value: parameters.covariates.join(",") },
+        { Parameter: "Time Variable", Value: parameters.timeVariable },
+        { Parameter: "Event Variable", Value: parameters.eventVariable },
+        { Parameter: "Distribution", Value: parameters.distribution },
+        { Parameter: "Stage Variable", Value: parameters.stageVariable },
+        { Parameter: "Distant Stage Value", Value: +parameters.distantStageValue },
+        { Parameter: "Adjustment Factor r", Value: +parameters.adjustmentFactorR },
+        { Parameter: "Years of Follow-up", Value: +parameters.followUpYears },
+      ];
+      const sheets = [
+        { name: "Parameters", data: parameterRows },
+        { name: "Results", data: results },
+      ];
+      this.fileService.downloadExcel(sheets, fileName);
     }
   }
 
@@ -71,7 +87,7 @@ export class IndividualDataResultsComponent {
     if (parameters && results?.length) {
       const fileNamePrefix = parameters.individualDataFileName || "individual_data";
       const timestamp = this.getTimestamp();
-      const fileName = `${fileNamePrefix}_workspace_${timestamp}.recurrisk_individual_data_workspace`;
+      const fileName = `recurrisk_${fileNamePrefix}_${timestamp}.individual_data_workspace`;
       const fileContents = JSON.stringify(this.workspace);
       this.fileService.downloadText(fileContents, fileName);
     }
