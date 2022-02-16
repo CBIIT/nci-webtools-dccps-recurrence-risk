@@ -41,32 +41,43 @@ export class MultiselectComponent implements OnInit, OnChanges, ControlValueAcce
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.options) {
-      for (const key in this.form.controls) {
-        this.form.removeControl(key, { emitEvent: false });
-      }
-
-      this.options.forEach((option: SelectOption) => {
-        this.form.addControl(
-          option.value,
-          new FormControl({
-            value: this.value.includes(option.value),
-            disabled: option.disabled,
-          }),
-          { emitEvent: false },
-        );
-      });
+      this.resetOptions(changes.options.currentValue);
     }
   }
 
+  resetOptions(options: SelectOption[]) {
+    for (const key in this.form.controls) {
+      this.form.removeControl(key, { emitEvent: false });
+    }
+
+    options.forEach((option: SelectOption) => {
+      this.form.addControl(
+        option.value,
+        new FormControl({
+          value: this.value.includes(option.value),
+          disabled: option.disabled,
+        }),
+        { emitEvent: false },
+      );
+    });
+  }
+
   writeValue(value: any): void {
-    this.value = Array.from(value || []);
-    const formValue = this.options.reduce(
-      (value, option) => ({
-        ...value,
-        [option.value]: this.value.includes(option.value),
-      }),
-      {} as any,
-    );
+    let formValue: any = {};
+
+    // preserve value if no option exists with the specified value
+    for (const key of value) {
+      if (!this.form.get(key)) {
+        this.form.addControl(key, new FormControl({ value: true }));
+      }
+      formValue[key] = true;
+    }
+
+    // set form value based on options
+    for (const option of this.options) {
+      formValue[option.value] = this.value.includes(option.value);
+    }
+
     this.form.setValue(formValue);
   }
 
