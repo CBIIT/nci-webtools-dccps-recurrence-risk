@@ -28,12 +28,14 @@ export class IndividualDataComponent implements OnInit {
     });
   }
 
-  handleReset() {
+  handleReset(resetWorkspace = true) {
     this.activeNavId = "results";
-    this.workspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
     this.error = null;
     this.loading = false;
     this.alerts = [];
+    if (resetWorkspace) {
+      this.workspace = DEFAULT_INDIVIDUAL_DATA_WORKSPACE;
+    }
   }
 
   async loadResults(id: string) {
@@ -55,7 +57,7 @@ export class IndividualDataComponent implements OnInit {
 
   async handleSubmit(parameters: IndividualDataParameters) {
     try {
-      this.handleReset();
+      this.handleReset(false);
       this.loading = true;
       const response$ = this.recurrenceRiskService.getRiskFromIndividualData(parameters);
       const results = await lastValueFrom(response$);
