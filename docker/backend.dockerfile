@@ -1,15 +1,18 @@
-FROM ${BASE_IMAGE:-public.ecr.aws/amazonlinux/amazonlinux:2}
+FROM quay.io/centos/centos:stream9
 
-RUN yum -y update \
- && curl -fsSL https://rpm.nodesource.com/setup_16.x | bash - \
- && amazon-linux-extras enable R4 \
- && yum clean metadata \
- && yum -y install \
-    java-17-amazon-corretto \
-    java-17-amazon-corretto-devel \
-    nodejs \ 
+RUN dnf -y update \
+ && dnf -y install \
+    dnf-plugins-core \
+    epel-release \
+ && dnf config-manager --set-enabled crb \
+ && curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - \
+ && dnf -y install \
+    gcc-c++ \
+    make \
+    nodejs \
+    python3-devel \
     R \
- && yum clean all
+ && dnf clean all
 
 RUN R CMD javareconf
 

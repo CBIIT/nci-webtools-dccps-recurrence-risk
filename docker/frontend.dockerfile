@@ -1,13 +1,17 @@
-FROM ${BASE_IMAGE:-public.ecr.aws/amazonlinux/amazonlinux:2}
+FROM quay.io/centos/centos:stream9
 
-RUN yum -y update \
- && curl -fsSL https://rpm.nodesource.com/setup_16.x | bash - \
- && amazon-linux-extras enable httpd_modules \
- && yum clean metadata \
- && yum -y install \
+RUN dnf -y update \
+ && dnf -y install \
+    dnf-plugins-core \
+    epel-release \
+ && dnf config-manager --set-enabled crb \
+ && curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - \
+ && dnf -y install \
+    gcc-c++ \
     httpd \
+    make \
     nodejs \
- && yum clean all
+ && dnf clean all
 
 RUN mkdir -p /app/client
 
@@ -30,4 +34,4 @@ EXPOSE 80
 EXPOSE 443
 
 CMD rm -rf /run/httpd/* /tmp/httpd* \
- && exec /usr/sbin/apachectl -DFOREGROUND
+ && exec /usr/sbin/httpd -DFOREGROUND
