@@ -6,7 +6,7 @@ RUN dnf -y update \
     make \
     nodejs \
     npm \
-    R \
+    R-4.1.3 \
  && dnf clean all
 
 RUN R CMD javareconf
